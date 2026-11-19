@@ -55,8 +55,10 @@ export default {
         });
       }
 
-      const data = await request.json();
+            const body = await request.json();
+      const data = { ...(body.record || {}), ...body };
       const type = data.type || data.category || data.recordType;
+      
 
       if (type === "project" || type === "projects") {
         await env.DB.prepare(
