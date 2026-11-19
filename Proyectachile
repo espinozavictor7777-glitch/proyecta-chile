@@ -1,0 +1,8 @@
+name = "proyecta-chile"
+main = "api/records.js"
+compatibility_date = "2026-11-19"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "proyectachile"
+database_id = "3ee3be42-b2e5-4e88-aae8-6c66b3a8de34"
