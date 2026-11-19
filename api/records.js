@@ -1,5 +1,4 @@
 
-
 export default {
   async fetch(request, env) {
     const headers = {
@@ -13,6 +12,54 @@ export default {
     if (request.method !== "GET" && request.method !== "POST") {
       return response({ error: "Método no permitido" }, 405);
     }
+
+    const clean = (value, max = 2000) =>
+      typeof value === "string"
+        ? value.trim().slice(0, max)
+        : "";
+
+    const cleanPhotos = (value) => {
+      let items = [];
+
+      if (Array.isArray(value)) {
+        items = value;
+      } else if (typeof value === "string" && value.trim()) {
+        try {
+          const parsed = JSON.parse(value);
+          items = Array.isArray(parsed) ? parsed : [value];
+        } catch {
+          items = [value];
+        }
+      }
+
+      const valid = items.map((item) => {
+        const raw = clean(item, 1000);
+        if (!raw) return "";
+
+        try {
+          const url = new URL(raw);
+          return ["https:", "http:"].includes(url.protocol)
+            ? url.href
+            : "";
+        } catch {
+          return "";
+        }
+      }).filter(Boolean);
+
+      return [...new Set(valid)].slice(0, 6);
+    };
+
+    const addPhotosColumn = async (table) => {
+      try {
+        await env.DB.prepare(
+          `ALTER TABLE ${table} ADD COLUMN photos TEXT`
+        ).run();
+      } catch (error) {
+        if (!String(error.message).toLowerCase().includes("duplicate column name")) {
+          throw error;
+        }
+      }
+    };
 
     try {
       await env.DB.batch([
@@ -32,6 +79,7 @@ export default {
           area TEXT,
           description TEXT,
           contact TEXT,
+          photos TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )`),
         env.DB.prepare(`CREATE TABLE IF NOT EXISTS stores (
@@ -40,9 +88,13 @@ export default {
           area TEXT,
           description TEXT,
           contact TEXT,
+          photos TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )`)
       ]);
+
+      await addPhotosColumn("profiles");
+      await addPhotosColumn("stores");
 
       if (request.method === "GET") {
         const [projects, profiles, stores] = await Promise.all([
@@ -74,11 +126,6 @@ export default {
         data.type || data.category || data.recordType || ""
       ).toLowerCase();
 
-      const clean = (value, max = 2000) =>
-        typeof value === "string"
-          ? value.trim().slice(0, max)
-          : "";
-
       const name = clean(data.name, 150);
 
       if (!name) {
@@ -101,26 +148,32 @@ export default {
       } else if (type === "profile" || type === "profiles") {
         await env.DB.prepare(
           `INSERT INTO profiles
-          (name, skill, area, description, contact)
-          VALUES (?, ?, ?, ?, ?)`
+          (name, skill, area, description, contact, photos)
+          VALUES (?, ?, ?, ?, ?, ?)`
         ).bind(
           name,
           clean(data.skill, 150),
           clean(data.area, 150),
           clean(data.description),
-          clean(data.contact, 250)
+          clean(data.contact, 250),
+          JSON.stringify(cleanPhotos(
+            data.photos || data.images || data.image
+          ))
         ).run();
 
       } else if (type === "store" || type === "stores") {
         await env.DB.prepare(
           `INSERT INTO stores
-          (name, area, description, contact)
-          VALUES (?, ?, ?, ?)`
+          (name, area, description, contact, photos)
+          VALUES (?, ?, ?, ?, ?)`
         ).bind(
           name,
           clean(data.area, 150),
           clean(data.description),
-          clean(data.contact, 250)
+          clean(data.contact, 250),
+          JSON.stringify(cleanPhotos(
+            data.photos || data.images || data.image
+          ))
         ).run();
 
       } else {
