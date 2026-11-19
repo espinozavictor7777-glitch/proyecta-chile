@@ -1,7 +1,10 @@
+
+
 export default {
   async fetch(request, env) {
     const headers = {
-      "Content-Type": "application/json; charset=utf-8"
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
     };
 
     const response = (data, status = 200) =>
@@ -49,57 +52,93 @@ export default {
         ]);
 
         return response({
+          success: true,
           projects: projects.results,
           profiles: profiles.results,
           stores: stores.results
         });
       }
 
-            const body = await request.json();
-      const data = { ...(body.record || {}), ...body };
-      const type = data.type || data.category || data.recordType;
-      
+      const body = await request.json();
+
+      if (!body || typeof body !== "object" || Array.isArray(body)) {
+        return response({ error: "Datos no válidos" }, 400);
+      }
+
+      const data = {
+        ...(body.record || {}),
+        ...body
+      };
+
+      const type = String(
+        data.type || data.category || data.recordType || ""
+      ).toLowerCase();
+
+      const clean = (value, max = 2000) =>
+        typeof value === "string"
+          ? value.trim().slice(0, max)
+          : "";
+
+      const name = clean(data.name, 150);
+
+      if (!name) {
+        return response({ error: "El nombre es obligatorio" }, 400);
+      }
 
       if (type === "project" || type === "projects") {
         await env.DB.prepare(
-          "INSERT INTO projects (name, area, description, budget, contact) VALUES (?, ?, ?, ?, ?)"
+          `INSERT INTO projects
+          (name, area, description, budget, contact)
+          VALUES (?, ?, ?, ?, ?)`
         ).bind(
-          data.name || "",
-          data.area || "",
-          data.description || "",
-          data.budget || "",
-          data.contact || ""
+          name,
+          clean(data.area, 150),
+          clean(data.description),
+          clean(data.budget, 100),
+          clean(data.contact, 250)
         ).run();
 
       } else if (type === "profile" || type === "profiles") {
         await env.DB.prepare(
-          "INSERT INTO profiles (name, skill, area, description, contact) VALUES (?, ?, ?, ?, ?)"
+          `INSERT INTO profiles
+          (name, skill, area, description, contact)
+          VALUES (?, ?, ?, ?, ?)`
         ).bind(
-          data.name || "",
-          data.skill || "",
-          data.area || "",
-          data.description || "",
-          data.contact || ""
+          name,
+          clean(data.skill, 150),
+          clean(data.area, 150),
+          clean(data.description),
+          clean(data.contact, 250)
         ).run();
 
       } else if (type === "store" || type === "stores") {
         await env.DB.prepare(
-          "INSERT INTO stores (name, area, description, contact) VALUES (?, ?, ?, ?)"
+          `INSERT INTO stores
+          (name, area, description, contact)
+          VALUES (?, ?, ?, ?)`
         ).bind(
-          data.name || "",
-          data.area || "",
-          data.description || "",
-          data.contact || ""
+          name,
+          clean(data.area, 150),
+          clean(data.description),
+          clean(data.contact, 250)
         ).run();
 
       } else {
-        return response({ error: "Tipo de registro no válido" }, 400);
+        return response({
+          error: "Tipo de registro no válido"
+        }, 400);
       }
 
-      return response({ success: true, message: "Registro guardado" }, 201);
+      return response({
+        success: true,
+        message: "Registro guardado correctamente"
+      }, 201);
 
     } catch (error) {
-      return response({ error: "Error del servidor", detail: error.message }, 500);
+      return response({
+        error: "Error del servidor",
+        detail: error.message
+      }, 500);
     }
   }
 };
