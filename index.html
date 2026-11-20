@@ -291,7 +291,6 @@ function photosHTML(photos){
   return '<div class="photos">'+valid.map(url=>`<a href="${esc(url)}" target="_blank" rel="noopener"><img src="${esc(url)}" loading="lazy" alt="Fotografía de publicación"></a>`).join('')+'</div>';
 }
 
-/* Construye botones de contacto a partir del teléfono o correo publicado. */
 function contactActions(contact,kind,title){
   const value=String(contact||'').trim();
   if(!value)return '<p class="note">Esta publicación no tiene un contacto público informado.</p>';
@@ -440,14 +439,18 @@ function render(){
   }
 }
 
+/* CORREGIDO: el servidor entrega un arreglo llamado records. */
 async function refresh(){
   try{
     const d=await api('/api/records');
+    const records=Array.isArray(d.records)?d.records:[];
+
     cache={
-      projects:Array.isArray(d.projects)?d.projects:[],
-      profiles:Array.isArray(d.profiles)?d.profiles:[],
-      stores:Array.isArray(d.stores)?d.stores:[]
+      projects:records.filter(x=>x.type==='project'||x.type==='projects'),
+      profiles:records.filter(x=>x.type==='profile'||x.type==='profiles'),
+      stores:records.filter(x=>x.type==='store'||x.type==='stores')
     };
+
     render();
     status('Conectado. Los registros se comparten entre todos los teléfonos.');
   }catch(e){
@@ -469,12 +472,18 @@ async function uploadPhotos(inputId){
   return urls;
 }
 
+/* CORREGIDO: el servidor espera los campos directamente junto con type. */
 async function submitRecord(type,record,form,fileInput){
   try{
     status('Guardando publicación…');
     const photos=await uploadPhotos(fileInput);
     record.photos=photos;
-    await api('/api/records',{method:'POST',body:JSON.stringify({type,record})});
+
+    await api('/api/records',{
+      method:'POST',
+      body:JSON.stringify({...record,type})
+    });
+
     form.reset();
     await refresh();
     status('¡Publicado correctamente! Ya está disponible para los visitantes.');
