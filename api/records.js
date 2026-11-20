@@ -14,13 +14,14 @@ const encoder = new TextEncoder();
 const clean = (value, max = 2000) =>
   typeof value === "string" ? value.trim().slice(0, max) : "";
 
-function json(data, status = 200) {
+function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff"
+      "X-Content-Type-Options": "nosniff",
+      ...extraHeaders
     }
   });
 }
@@ -28,111 +29,67 @@ function json(data, status = 200) {
 function base64url(bytes) {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
 function fromBase64url(value) {
-  const normal = value.replace(/-/g, "+").replace(/_/g, "/");
-  const binary = atob(normal);
-  return Uint8Array.from(binary, c => c.charCodeAt(0));
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, char => char.charCodeAt(0));
 }
 
-async function signToken(payload, secret) {
+async function signToken(secret) {
+  const header = base64url(encoder.encode(JSON.stringify({ alg: "HS256", typ: "JWT" })));
+  const payload = base64url(encoder.encode(JSON.stringify({
+    role: "admin",
+    exp: Math.floor(Date.now() / 1000) + 2 * 60 * 60
+  })));
+  const data = `${header}.${payload}`;
   const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
+    "raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
   );
-
-  const data = base64url(encoder.encode(JSON.stringify(payload)));
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    encoder.encode(data)
-  );
-
-  return data + "." + base64url(new Uint8Array(signature));
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
+  return `${data}.${base64url(new Uint8Array(signature))}`;
 }
 
 async function verifyToken(token, secret) {
   try {
-    if (!secret || typeof token !== "string") return false;
-
+    if (!token || !secret) return false;
     const parts = token.split(".");
-    if (parts.length !== 2) return false;
-
+    if (parts.length !== 3) return false;
+    const data = `${parts[0]}.${parts[1]}`;
     const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"]
+      "raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]
     );
-
     const valid = await crypto.subtle.verify(
-      "HMAC",
-      key,
-      fromBase64url(parts[1]),
-      encoder.encode(parts[0])
+      "HMAC", key, fromBase64url(parts[2]), encoder.encode(data)
     );
-
     if (!valid) return false;
-
-    const payload = JSON.parse(
-      new TextDecoder().decode(fromBase64url(parts[0]))
-    );
-
-    return payload.exp > Math.floor(Date.now() / 1000);
+    const payload = JSON.parse(new TextDecoder().decode(fromBase64url(parts[1])));
+    return payload.role === "admin" && Number(payload.exp) > Math.floor(Date.now() / 1000);
   } catch {
     return false;
   }
 }
 
 async function isAdmin(request, env) {
-  const header = request.headers.get("Authorization") || "";
-  if (!header.startsWith("Bearer ")) return false;
-
-  return verifyToken(
-    header.slice(7),
-    env.ADMIN_TOKEN
-  );
+  const authorization = request.headers.get("Authorization") || "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  return verifyToken(token, env.ADMIN_TOKEN);
 }
 
 function cleanPhotos(value) {
-  let items = [];
-
-  if (Array.isArray(value)) {
-    items = value;
-  } else if (typeof value === "string" && value.trim()) {
-    try {
-      const parsed = JSON.parse(value);
-      items = Array.isArray(parsed) ? parsed : [value];
-    } catch {
-      items = [value];
-    }
+  let photos = value;
+  if (typeof photos === "string") {
+    try { photos = JSON.parse(photos); } catch { photos = []; }
   }
-
-  return [...new Set(items.map(item => {
-    const raw = clean(item, 500);
-
-    if (/^\/api\/photo\/[A-Za-z0-9._/-]+$/.test(raw)) {
-      return raw;
-    }
-
-    try {
-      const url = new URL(raw);
-      return ["https:", "http:"].includes(url.protocol)
-        ? url.href
-        : "";
-    } catch {
-      return "";
-    }
-  }).filter(Boolean))].slice(0, 8);
+  if (!Array.isArray(photos)) return [];
+  return photos
+    .filter(item => typeof item === "string")
+    .map(item => item.trim().slice(0, 1000))
+    .filter(Boolean)
+    .slice(0, 10);
 }
 
 async function ensureSchema(env) {
@@ -145,10 +102,9 @@ async function ensureSchema(env) {
       description TEXT,
       budget TEXT,
       contact TEXT,
-      photos TEXT,
+      photos TEXT DEFAULT '[]',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )`),
-
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS profiles (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -156,419 +112,304 @@ async function ensureSchema(env) {
       area TEXT,
       description TEXT,
       contact TEXT,
-      photos TEXT,
+      photos TEXT DEFAULT '[]',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )`),
-
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS stores (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       area TEXT,
       description TEXT,
       contact TEXT,
-      photos TEXT,
+      photos TEXT DEFAULT '[]',
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS quote_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      record_type TEXT,
+      record_id INTEGER,
+      record_name TEXT,
+      customer_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      area TEXT,
+      description TEXT NOT NULL,
+      status TEXT DEFAULT 'pendiente',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )`)
   ]);
 
-  for (const table of ["projects", "profiles", "stores"]) {
-    try {
-      await env.DB.prepare(
-        `ALTER TABLE ${table} ADD COLUMN photos TEXT`
-      ).run();
-    } catch (error) {
-      if (!String(error.message).toLowerCase().includes("duplicate column")) {
-        throw error;
-      }
-    }
-  }
-
   try {
-    await env.DB.prepare(
-      "ALTER TABLE projects ADD COLUMN title TEXT"
-    ).run();
+    await env.DB.prepare("ALTER TABLE projects ADD COLUMN photos TEXT DEFAULT '[]'").run();
   } catch (error) {
-    if (!String(error.message).toLowerCase().includes("duplicate column")) {
-      throw error;
-    }
+    if (!String(error).toLowerCase().includes("duplicate column")) throw error;
+  }
+  try {
+    await env.DB.prepare("ALTER TABLE profiles ADD COLUMN photos TEXT DEFAULT '[]'").run();
+  } catch (error) {
+    if (!String(error).toLowerCase().includes("duplicate column")) throw error;
+  }
+  try {
+    await env.DB.prepare("ALTER TABLE stores ADD COLUMN photos TEXT DEFAULT '[]'").run();
+  } catch (error) {
+    if (!String(error).toLowerCase().includes("duplicate column")) throw error;
+  }
+  try {
+    await env.DB.prepare("ALTER TABLE projects ADD COLUMN title TEXT").run();
+  } catch (error) {
+    if (!String(error).toLowerCase().includes("duplicate column")) throw error;
   }
 }
 
 function recordFields(table) {
   if (table === "projects") {
-    return [
-      "name",
-      "title",
-      "area",
-      "description",
-      "budget",
-      "contact",
-      "photos"
-    ];
+    return ["name", "title", "area", "description", "budget", "contact", "photos"];
   }
-
   if (table === "profiles") {
     return ["name", "skill", "area", "description", "contact", "photos"];
   }
-
   return ["name", "area", "description", "contact", "photos"];
 }
 
-function recordValues(table, data) {
-  return recordFields(table).map(field => {
-    if (field === "photos") {
-      return JSON.stringify(
-        cleanPhotos(data.photos || data.images || data.image)
-      );
-    }
-
-    const limits = {
-      name: 150,
-      title: 150,
-      skill: 150,
-      area: 150,
-      description: 2000,
-      budget: 100,
-      contact: 250
-    };
-
-    return clean(data[field], limits[field] || 250);
-  });
+function recordValues(table, body) {
+  const name = clean(body.name || body.title, 120);
+  const values = {
+    name,
+    title: clean(body.title || body.name, 160),
+    skill: clean(body.skill, 120),
+    area: clean(body.area || body.comuna, 120),
+    description: clean(body.description, 4000),
+    budget: clean(body.budget, 120),
+    contact: clean(body.contact || body.phone || body.email, 180),
+    photos: JSON.stringify(cleanPhotos(body.photos))
+  };
+  return recordFields(table).map(field => values[field] ?? "");
 }
 
-async function readImageType(file) {
-  const bytes = new Uint8Array(
-    await file.slice(0, 12).arrayBuffer()
-  );
-
-  const starts = (...values) =>
-    values.every((value, index) => bytes[index] === value);
-
-  if (starts(0xFF, 0xD8, 0xFF)) return "image/jpeg";
-
-  if (starts(0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)) {
-    return "image/png";
+function readImageType(bytes) {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return { ext: "jpg", type: "image/jpeg" };
   }
-
-  if (
-    starts(0x52, 0x49, 0x46, 0x46) &&
-    bytes[8] === 0x57 &&
-    bytes[9] === 0x45 &&
-    bytes[10] === 0x42 &&
-    bytes[11] === 0x50
-  ) {
-    return "image/webp";
+  if (bytes.length >= 8 &&
+      bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    return { ext: "png", type: "image/png" };
   }
-
-  if (
-    starts(0x47, 0x49, 0x46, 0x38) &&
-    (bytes[4] === 0x37 || bytes[4] === 0x39) &&
-    bytes[5] === 0x61
-  ) {
-    return "image/gif";
+  if (bytes.length >= 12 &&
+      String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+      String.fromCharCode(...bytes.slice(8, 12)) === "WEBP") {
+    return { ext: "webp", type: "image/webp" };
   }
+  if (bytes.length >= 6 &&
+      ["GIF87a", "GIF89a"].includes(String.fromCharCode(...bytes.slice(0, 6)))) {
+    return { ext: "gif", type: "image/gif" };
+  }
+  return null;
+}
 
-  return "";
+function normalizeRecord(row) {
+  return { ...row, photos: cleanPhotos(row.photos) };
 }
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-
     try {
-      if (!env.DB) {
-        return json({ error: "La base de datos D1 no está configurada." }, 503);
-      }
+      if (!env.DB) return json({ error: "La base de datos D1 no está configurada." }, 500);
 
-      // Inicio de sesión del administrador.
-      if (path === "/api/admin/login") {
-        if (request.method !== "POST") {
-          return json({ error: "Método no permitido" }, 405);
-        }
+      const url = new URL(request.url);
+      const path = url.pathname.replace(/\/+$/, "") || "/";
+      const method = request.method.toUpperCase();
 
-        if (!env.ADMIN_TOKEN) {
-          return json({ error: "Falta configurar ADMIN_TOKEN en Cloudflare." }, 503);
-        }
-
+      if (path === "/api/admin/login" && method === "POST") {
+        if (!env.ADMIN_TOKEN) return json({ error: "Falta configurar ADMIN_TOKEN." }, 500);
         const body = await request.json();
-        const password = clean(body.password, 500);
-
-        if (!password || password !== env.ADMIN_TOKEN) {
-          return json({ error: "Clave de administrador incorrecta." }, 401);
+        if (clean(body.password, 300) !== env.ADMIN_TOKEN) {
+          return json({ error: "Contraseña incorrecta." }, 401);
         }
-
-        const token = await signToken({
-          role: "admin",
-          exp: Math.floor(Date.now() / 1000) + 7200
-        }, env.ADMIN_TOKEN);
-
-        return json({
-          success: true,
-          token,
-          expiresIn: 7200
-        });
+        const token = await signToken(env.ADMIN_TOKEN);
+        return json({ ok: true, token });
       }
 
-      // Verificación de sesión administrativa.
-      if (path === "/api/admin/check") {
-        if (request.method !== "GET") {
-          return json({ error: "Método no permitido" }, 405);
-        }
-
-        return await isAdmin(request, env)
-          ? json({ success: true })
-          : json({ error: "Sesión no autorizada." }, 401);
+      if (path === "/api/admin/check" && method === "GET") {
+        return json({ ok: await isAdmin(request, env) });
       }
 
-      // Lectura de fotografías guardadas en R2.
-      if (path.startsWith("/api/photo/")) {
-        if (request.method !== "GET" && request.method !== "HEAD") {
-          return json({ error: "Método no permitido" }, 405);
-        }
-
-        if (!env.PHOTOS) {
-          return json({ error: "El almacenamiento R2 no está configurado." }, 503);
-        }
-
-        const key = path.slice("/api/photo/".length);
-
-        if (
-          !key ||
-          key.includes("..") ||
-          key.startsWith("/") ||
-          !/^uploads\/[A-Za-z0-9._-]+$/.test(key)
-        ) {
-          return json({ error: "Fotografía no válida." }, 400);
-        }
-
+      if (path.startsWith("/api/photo/") && (method === "GET" || method === "HEAD")) {
+        if (!env.PHOTOS) return json({ error: "El almacenamiento de fotos no está configurado." }, 500);
+        const key = decodeURIComponent(path.slice("/api/photo/".length));
+        if (!key || key.includes("..")) return json({ error: "Foto no encontrada." }, 404);
         const object = await env.PHOTOS.get(key);
-
-        if (!object) {
-          return json({ error: "Fotografía no encontrada." }, 404);
-        }
-
+        if (!object) return json({ error: "Foto no encontrada." }, 404);
         const headers = new Headers();
         object.writeHttpMetadata(headers);
-        headers.set("ETag", object.httpEtag);
-        headers.set("Cache-Control", "public, max-age=86400");
+        headers.set("etag", object.httpEtag);
+        headers.set("Cache-Control", "public, max-age=31536000, immutable");
         headers.set("X-Content-Type-Options", "nosniff");
-
-        return new Response(
-          request.method === "HEAD" ? null : object.body,
-          { headers }
-        );
+        if (method === "HEAD") return new Response(null, { headers });
+        return new Response(object.body, { headers });
       }
 
-      // Subida de fotografías a R2.
-      if (path === "/api/upload") {
-        if (request.method !== "POST") {
-          return json({ error: "Método no permitido" }, 405);
-        }
-
-        if (!env.PHOTOS) {
-          return json({ error: "El almacenamiento R2 no está configurado." }, 503);
-        }
-
+      if (path === "/api/upload" && method === "POST") {
+        if (!env.PHOTOS) return json({ error: "El almacenamiento de fotos no está configurado." }, 500);
         const form = await request.formData();
         const file = form.get("file");
-
-        if (!(file instanceof File) || !file.size) {
-          return json({ error: "Selecciona una fotografía." }, 400);
+        if (!file || typeof file.arrayBuffer !== "function") {
+          return json({ error: "No se recibió ninguna imagen." }, 400);
         }
-
-        if (file.size > MAX_IMAGE_SIZE) {
-          return json({ error: "La fotografía supera el máximo de 5 MB." }, 400);
+        if (file.size <= 0 || file.size > MAX_IMAGE_SIZE) {
+          return json({ error: "La imagen debe pesar como máximo 5 MB." }, 400);
         }
-
-        const mime = await readImageType(file);
-
-        if (!mime) {
-          return json({ error: "Formato no válido. Usa JPG, PNG, WEBP o GIF." }, 400);
-        }
-
-        const extensions = {
-          "image/jpeg": "jpg",
-          "image/png": "png",
-          "image/webp": "webp",
-          "image/gif": "gif"
-        };
-
-        const key = `uploads/${crypto.randomUUID()}.${extensions[mime]}`;
-
-        await env.PHOTOS.put(key, file.stream(), {
-          httpMetadata: {
-            contentType: mime,
-            cacheControl: "public, max-age=86400"
-          }
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const imageType = readImageType(bytes);
+        if (!imageType) return json({ error: "Formato no permitido. Usa JPG, PNG, WEBP o GIF." }, 400);
+        const key = `${Date.now()}-${crypto.randomUUID()}.${imageType.ext}`;
+        await env.PHOTOS.put(key, bytes, {
+          httpMetadata: { contentType: imageType.type }
         });
-
-        return json({
-          success: true,
-          key,
-          url: `/api/photo/${key}`
-        }, 201);
+        return json({ ok: true, key, url: `/api/photo/${encodeURIComponent(key)}` });
       }
 
-      // Todas las operaciones de registros necesitan D1.
-      if (
-        path === "/api/records" ||
-        /^\/api\/records\/(projects|profiles|stores)\/\d+$/.test(path)
-      ) {
+      if (path === "/api/quotes" || path.startsWith("/api/quotes/")) {
         await ensureSchema(env);
+
+        if (path === "/api/quotes" && method === "POST") {
+          const body = await request.json();
+          const customerName = clean(body.customer_name || body.name, 120);
+          const phone = clean(body.phone || body.contact, 60);
+          const area = clean(body.area || body.comuna, 120);
+          const description = clean(body.description || body.message, 3000);
+          const recordType = clean(body.record_type || body.type, 30).toLowerCase();
+          const recordId = Number(body.record_id || body.id) || null;
+          const recordName = clean(body.record_name || body.title || body.project_name, 160);
+
+          if (!customerName || !phone || !description) {
+            return json({ error: "Completa tu nombre, teléfono y descripción." }, 400);
+          }
+          if (!/^[0-9+\s().-]{7,60}$/.test(phone)) {
+            return json({ error: "Ingresa un teléfono válido." }, 400);
+          }
+
+          const result = await env.DB.prepare(`
+            INSERT INTO quote_requests
+            (record_type, record_id, record_name, customer_name, phone, area, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            recordType, recordId, recordName, customerName, phone, area, description
+          ).run();
+
+          return json({ ok: true, id: result.meta?.last_row_id ?? null, message: "Solicitud recibida." }, 201);
+        }
+
+        if (path === "/api/quotes" && method === "GET") {
+          if (!(await isAdmin(request, env))) return json({ error: "No autorizado." }, 401);
+          const result = await env.DB.prepare(
+            "SELECT * FROM quote_requests ORDER BY created_at DESC, id DESC"
+          ).all();
+          return json({ ok: true, quotes: result.results || [] });
+        }
+
+        const quoteMatch = path.match(/^\/api\/quotes\/(\d+)$/);
+        if (quoteMatch && method === "PUT") {
+          if (!(await isAdmin(request, env))) return json({ error: "No autorizado." }, 401);
+          const id = Number(quoteMatch[1]);
+          const body = await request.json();
+          const status = clean(body.status, 30).toLowerCase();
+          if (!["pendiente", "contactado", "cerrado"].includes(status)) {
+            return json({ error: "Estado no válido." }, 400);
+          }
+          const result = await env.DB.prepare(
+            "UPDATE quote_requests SET status = ? WHERE id = ?"
+          ).bind(status, id).run();
+          if (!result.meta?.changes) return json({ error: "Solicitud no encontrada." }, 404);
+          return json({ ok: true, message: "Estado actualizado." });
+        }
+
+        return json({ error: "Ruta de cotizaciones no encontrada." }, 404);
       }
 
-      // Consulta pública, con filtros opcionales.
-      if (path === "/api/records" && request.method === "GET") {
-        const [projects, profiles, stores] = await Promise.all([
-          env.DB.prepare("SELECT * FROM projects ORDER BY id DESC").all(),
-          env.DB.prepare("SELECT * FROM profiles ORDER BY id DESC").all(),
-          env.DB.prepare("SELECT * FROM stores ORDER BY id DESC").all()
-        ]);
+      const recordRoute = path === "/api/records" ||
+        /^\/api\/records\/(projects|profiles|stores)\/\d+$/.test(path);
+      if (recordRoute) await ensureSchema(env);
 
-        const result = {
-          projects: projects.results,
-          profiles: profiles.results,
-          stores: stores.results
-        };
-
+      if (path === "/api/records" && method === "GET") {
         const term = clean(url.searchParams.get("q"), 100).toLowerCase();
         const area = clean(url.searchParams.get("area"), 100).toLowerCase();
         const type = clean(url.searchParams.get("type"), 30).toLowerCase();
 
-        for (const table of Object.keys(result)) {
-          if (type && type !== table && type !== table.slice(0, -1)) {
-            result[table] = [];
-            continue;
+        const tables = type && TABLES[type]
+          ? [TABLES[type]]
+          : ["projects", "profiles", "stores"];
+
+        const all = [];
+        for (const table of tables) {
+          const result = await env.DB.prepare(
+            `SELECT * FROM ${table} ORDER BY created_at DESC, id DESC`
+          ).all();
+          for (const row of result.results || []) {
+            const item = normalizeRecord(row);
+            item.type = table === "projects" ? "project" : table === "profiles" ? "profile" : "store";
+            const searchable = [
+              item.name, item.title, item.area, item.description, item.skill
+            ].join(" ").toLowerCase();
+            if (term && !searchable.includes(term)) continue;
+            if (area && !String(item.area || "").toLowerCase().includes(area)) continue;
+            all.push(item);
           }
-
-          result[table] = result[table]
-            .filter(item => {
-              const searchable = [
-                item.name,
-                item.title,
-                item.skill,
-                item.area,
-                item.description
-              ].join(" ").toLowerCase();
-
-              return (
-                (!term || searchable.includes(term)) &&
-                (!area || String(item.area || "").toLowerCase().includes(area))
-              );
-            })
-            .map(item => ({
-              ...item,
-              photos: cleanPhotos(item.photos)
-            }));
         }
-
-        return json({ success: true, ...result });
+        all.sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+        return json({ ok: true, records: all });
       }
 
-      // Crear publicaciones públicas.
-      if (path === "/api/records" && request.method === "POST") {
+      if (path === "/api/records" && method === "POST") {
         const body = await request.json();
+        const requestedType = clean(body.type || body.category || body.recordType, 30).toLowerCase();
+        const table = TABLES[requestedType];
+        if (!table) return json({ error: "Tipo de publicación no válido." }, 400);
 
-        if (!body || typeof body !== "object" || Array.isArray(body)) {
-          return json({ error: "Datos no válidos." }, 400);
-        }
-
-        const data = {
-          ...(body.record || {}),
-          ...body
-        };
-
-        const type = String(
-          data.type || data.category || data.recordType || ""
-        ).toLowerCase();
-
-        const table = TABLES[type];
-
-        if (!table) {
-          return json({ error: "Tipo de registro no válido." }, 400);
-        }
-
-        const values = recordValues(table, data);
-
-        if (!values[0]) {
-          return json({ error: "El nombre es obligatorio." }, 400);
-        }
+        const values = recordValues(table, body);
+        if (!values[0]) return json({ error: "El nombre o título es obligatorio." }, 400);
 
         const fields = recordFields(table);
         const placeholders = fields.map(() => "?").join(", ");
-
-        await env.DB.prepare(
+        const result = await env.DB.prepare(
           `INSERT INTO ${table} (${fields.join(", ")}) VALUES (${placeholders})`
         ).bind(...values).run();
 
         return json({
-          success: true,
-          message: "Registro guardado correctamente."
+          ok: true,
+          id: result.meta?.last_row_id ?? null,
+          message: "Publicación guardada."
         }, 201);
       }
 
-      // Editar o eliminar un registro: solo administrador.
-      const match = path.match(
-        /^\/api\/records\/(projects|profiles|stores)\/(\d+)$/
-      );
+      const adminRecordMatch = path.match(/^\/api\/records\/(projects|profiles|stores)\/(\d+)$/);
+      if (adminRecordMatch && (method === "PUT" || method === "DELETE")) {
+        if (!(await isAdmin(request, env))) return json({ error: "No autorizado." }, 401);
+        const table = adminRecordMatch[1];
+        const id = Number(adminRecordMatch[2]);
 
-      if (match) {
-        if (!await isAdmin(request, env)) {
-          return json({ error: "Debes iniciar sesión como administrador." }, 401);
-        }
-
-        const table = match[1];
-        const id = Number(match[2]);
-
-        if (request.method === "DELETE") {
+        if (method === "DELETE") {
           const result = await env.DB.prepare(
             `DELETE FROM ${table} WHERE id = ?`
           ).bind(id).run();
-
-          return result.meta.changes
-            ? json({ success: true, message: "Registro eliminado." })
-            : json({ error: "Registro no encontrado." }, 404);
+          if (!result.meta?.changes) return json({ error: "Publicación no encontrada." }, 404);
+          return json({ ok: true, message: "Publicación eliminada." });
         }
 
-        if (request.method === "PUT") {
-          const body = await request.json();
-
-          if (!body || typeof body !== "object" || Array.isArray(body)) {
-            return json({ error: "Datos no válidos." }, 400);
-          }
-
-          const data = body.record && typeof body.record === "object"
-            ? body.record
-            : body;
-
-          const fields = recordFields(table);
-          const values = recordValues(table, data);
-
-          if (!values[0]) {
-            return json({ error: "El nombre es obligatorio." }, 400);
-          }
-
-          const assignments = fields.map(field => `${field} = ?`).join(", ");
-
-          const result = await env.DB.prepare(
-            `UPDATE ${table} SET ${assignments} WHERE id = ?`
-          ).bind(...values, id).run();
-
-          return result.meta.changes
-            ? json({ success: true, message: "Registro actualizado." })
-            : json({ error: "Registro no encontrado." }, 404);
-        }
-
-        return json({ error: "Método no permitido." }, 405);
+        const body = await request.json();
+        const fields = recordFields(table);
+        const values = recordValues(table, body);
+        const assignments = fields.map(field => `${field} = ?`).join(", ");
+        const result = await env.DB.prepare(
+          `UPDATE ${table} SET ${assignments} WHERE id = ?`
+        ).bind(...values, id).run();
+        if (!result.meta?.changes) return json({ error: "Publicación no encontrada." }, 404);
+        return json({ ok: true, message: "Publicación actualizada." });
       }
 
       return json({ error: "Ruta no encontrada." }, 404);
-
     } catch (error) {
-      console.error("Proyecta Chile API:", error);
       return json({
-        error: "No se pudo completar la operación. Revisa la configuración del servidor."
+        error: "Error interno del servidor.",
+        detail: String(error?.message || error).slice(0, 500)
       }, 500);
     }
   }
