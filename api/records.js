@@ -140,6 +140,7 @@ async function ensureSchema(env) {
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS projects (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      title TEXT,
       area TEXT,
       description TEXT,
       budget TEXT,
@@ -181,11 +182,29 @@ async function ensureSchema(env) {
       }
     }
   }
+
+  try {
+    await env.DB.prepare(
+      "ALTER TABLE projects ADD COLUMN title TEXT"
+    ).run();
+  } catch (error) {
+    if (!String(error.message).toLowerCase().includes("duplicate column")) {
+      throw error;
+    }
+  }
 }
 
 function recordFields(table) {
   if (table === "projects") {
-    return ["name", "area", "description", "budget", "contact", "photos"];
+    return [
+      "name",
+      "title",
+      "area",
+      "description",
+      "budget",
+      "contact",
+      "photos"
+    ];
   }
 
   if (table === "profiles") {
@@ -205,6 +224,7 @@ function recordValues(table, data) {
 
     const limits = {
       name: 150,
+      title: 150,
       skill: 150,
       area: 150,
       description: 2000,
@@ -426,6 +446,7 @@ export default {
             .filter(item => {
               const searchable = [
                 item.name,
+                item.title,
                 item.skill,
                 item.area,
                 item.description
