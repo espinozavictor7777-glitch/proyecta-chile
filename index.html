@@ -62,8 +62,22 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 .admin-actions button{flex:1;background:#edf3ef;color:var(--green)}
 .admin-actions .danger{background:#fff0f0;color:#922b2b}
 .filehint{font-size:12px;color:var(--muted)}
+.record-clickable{cursor:pointer;transition:border-color .15s}
+.record-clickable:hover{border-color:#789889}
+.open-hint{font-size:12px;color:var(--green);font-weight:700;margin-top:10px}
+.detail-overlay{position:fixed;inset:0;background:rgba(10,25,19,.68);z-index:20;display:none;align-items:flex-start;justify-content:center;padding:18px 12px;overflow-y:auto}
+.detail-overlay.open{display:flex}
+.detail-box{background:white;border-radius:17px;padding:19px;width:100%;max-width:650px;margin:auto;box-shadow:0 12px 45px rgba(0,0,0,.25)}
+.detail-top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.detail-top h2{margin:0}
+.close-detail{background:#edf3ef;color:var(--green);font-size:20px;padding:7px 13px}
+.detail-content{padding-top:10px}
+.detail-content p{white-space:pre-wrap;overflow-wrap:anywhere}
+.detail-content .photos img{width:calc(50% - 5px);height:150px;object-fit:cover}
+.detail-label{font-size:12px;color:var(--muted);font-weight:750;margin-top:15px}
+.detail-value{font-size:15px;margin-top:3px}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{gap:6px}.stat{padding:9px}.stat b{font-size:20px}.tag{font-size:9px}}
-@media print{header,nav,#globalStatus,footer,.no-print,.admin-actions{display:none!important}body{background:white}main{margin:0;max-width:none}.panel{display:none!important}#presupuesto{display:block!important}.formbox{border:0}}
+@media print{header,nav,#globalStatus,footer,.no-print,.admin-actions,.detail-overlay{display:none!important}body{background:white}main{margin:0;max-width:none}.panel{display:none!important}#presupuesto{display:block!important}.formbox{border:0}}
 </style>
 </head>
 <body>
@@ -111,6 +125,8 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
   <section id="nuevo" class="panel">
     <h2>Publicar un proyecto</h2><p class="sub">Comparte tu necesidad con la comunidad.</p>
     <form id="fProject" class="formbox">
+      <label for="pTitle">Título del proyecto *</label>
+      <input id="pTitle" required maxlength="150" placeholder="Ej. Ampliación de vivienda en María Pinto">
       <label for="pType">Tipo de trabajo *</label>
       <select id="pType" required><option value="">Selecciona</option><option>Construcción</option><option>Ampliación</option><option>Remodelación</option><option>Electricidad</option><option>Gasfitería</option><option>Pintura</option><option>Carpintería</option><option>Jardinería</option><option>Otro</option></select>
       <label for="pCommune">Comuna o localidad *</label><input id="pCommune" required maxlength="100" placeholder="Ej. María Pinto">
@@ -123,7 +139,7 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
       <button type="submit">Publicar proyecto</button><p class="note">No incluyas claves, documentos de identidad ni datos bancarios.</p>
     </form>
     <h3>Proyectos publicados</h3>
-    <input class="search" id="searchProjects" placeholder="Buscar por trabajo, comuna o descripción…" oninput="render()">
+    <input class="search" id="searchProjects" placeholder="Buscar por título, trabajo, comuna o descripción…" oninput="render()">
     <div id="projectsList" class="empty">Cargando…</div>
   </section>
 
@@ -200,6 +216,16 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
   </section>
 </main>
 
+<div id="detailOverlay" class="detail-overlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-box">
+    <div class="detail-top">
+      <h2 id="detailTitle">Detalle de publicación</h2>
+      <button class="close-detail" type="button" onclick="closeDetail()" aria-label="Cerrar">×</button>
+    </div>
+    <div id="detailContent" class="detail-content"></div>
+  </div>
+</div>
+
 <footer>
   PROYECTA CHILE · Donde tus proyectos se hacen realidad.
   <br>Plataforma comunitaria. Verifica los antecedentes antes de contratar.
@@ -220,6 +246,7 @@ function status(msg,error=false){
 }
 
 function go(id){
+  closeDetail();
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   window.scrollTo({top:0,behavior:'smooth'});
@@ -263,7 +290,7 @@ function photosHTML(photos){
 
 function adminButtons(x,kind){
   if(!adminToken||!x.id)return '';
-  return `<div class="admin-actions">
+  return `<div class="admin-actions" onclick="event.stopPropagation()">
     <button type="button" onclick="editRecord('${kind}',${Number(x.id)})">Editar</button>
     <button type="button" class="danger" onclick="deleteRecord('${kind}',${Number(x.id)})">Eliminar</button>
   </div>`;
@@ -273,19 +300,78 @@ function card(x,kind){
   const meta=kind==='profiles'
     ?`${esc(x.skill||'')} · ${esc(x.area||'')}`
     :esc(x.area||'');
+
+  const title=kind==='projects'
+    ?(x.title||x.name||'Proyecto')
+    :x.name;
+
   const extra=kind==='projects'
     ?`<p><b>Presupuesto:</b> ${x.budget==null||x.budget===''?'No informado':money(x.budget)}</p>`
     :'';
-  return `<article class="record">
-    <strong>${esc(x.name)}</strong>
+
+  return `<article class="record record-clickable" role="button" tabindex="0"
+    onclick="openDetail('${kind}',${Number(x.id)})"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('${kind}',${Number(x.id)})}">
+    <strong>${esc(title)}</strong>
     <small>${meta}</small>
     <p>${esc(x.description||'')}</p>
     ${extra}
     ${photosHTML(x.photos)}
-    <p><b>Contacto:</b> ${esc(x.contact||'No informado')}</p>
+    <div class="open-hint">Ver ficha completa →</div>
     ${adminButtons(x,kind)}
   </article>`;
 }
+
+function openDetail(kind,id){
+  const item=cache[kind].find(x=>Number(x.id)===Number(id));
+  if(!item)return;
+
+  const title=kind==='projects'?(item.title||item.name||'Proyecto'):item.name;
+  const kindLabel=kind==='projects'?'Proyecto':kind==='profiles'?'Profesional':'Proveedor';
+
+  let details='';
+
+  if(kind==='projects'){
+    details=`
+      <div class="detail-label">Tipo de trabajo</div>
+      <div class="detail-value">${esc(item.name||'No informado')}</div>
+      <div class="detail-label">Presupuesto estimado</div>
+      <div class="detail-value">${item.budget==null||item.budget===''?'No informado':money(item.budget)}</div>`;
+  }
+
+  if(kind==='profiles'){
+    details=`
+      <div class="detail-label">Especialidad u oficio</div>
+      <div class="detail-value">${esc(item.skill||'No informado')}</div>`;
+  }
+
+  $('detailTitle').textContent=title;
+  $('detailContent').innerHTML=`
+    <div class="detail-label">${kindLabel}</div>
+    <div class="detail-label">Comuna o zona</div>
+    <div class="detail-value">${esc(item.area||'No informada')}</div>
+    ${details}
+    <div class="detail-label">${kind==='stores'?'Productos o servicios':'Descripción y presentación'}</div>
+    <div class="detail-value">${esc(item.description||'Sin información adicional')}</div>
+    <div class="detail-label">Contacto público</div>
+    <div class="detail-value">${esc(item.contact||'No informado')}</div>
+    ${photosHTML(item.photos)}
+    <p class="note">Verifica directamente los antecedentes y condiciones antes de contratar.</p>
+    ${adminButtons(item,kind)}
+  `;
+
+  $('detailOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeDetail(){
+  $('detailOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeDetail();
+});
 
 function render(){
   $('nProjects').textContent=cache.projects.length;
@@ -302,7 +388,7 @@ function render(){
     const el=$(id);
     const q=($(searchId)?.value||'').trim().toLocaleLowerCase('es');
     const list=cache[key].filter(x=>{
-      const text=[x.name,x.skill,x.area,x.description,x.contact].join(' ').toLocaleLowerCase('es');
+      const text=[x.name,x.title,x.skill,x.area,x.description,x.contact].join(' ').toLocaleLowerCase('es');
       return text.includes(q);
     });
     el.innerHTML=list.length?list.map(x=>card(x,key)).join(''):'';
@@ -362,6 +448,7 @@ $('fProject').addEventListener('submit',e=>{
   e.preventDefault();
   submitRecord('project',{
     name:$('pType').value,
+    title:$('pTitle').value.trim(),
     area:$('pCommune').value.trim(),
     description:$('pDesc').value.trim(),
     budget:$('pBudget').value,
@@ -438,6 +525,7 @@ function logoutAdmin(){
 async function editRecord(kind,id){
   const item=cache[kind].find(x=>Number(x.id)===Number(id));
   if(!item)return;
+
   const name=prompt('Nombre o tipo de publicación:',item.name||'');
   if(name===null)return;
   const area=prompt('Comuna o zona:',item.area||'');
@@ -446,20 +534,34 @@ async function editRecord(kind,id){
   if(description===null)return;
   const contact=prompt('Contacto público:',item.contact||'');
   if(contact===null)return;
-  const record={name:name.trim(),area:area.trim(),description:description.trim(),contact:contact.trim()};
+
+  const record={
+    name:name.trim(),
+    area:area.trim(),
+    description:description.trim(),
+    contact:contact.trim()
+  };
+
   if(kind==='projects'){
+    const title=prompt('Título del proyecto:',item.title||'');
+    if(title===null)return;
     const budget=prompt('Presupuesto estimado:',item.budget??'');
     if(budget===null)return;
+    record.title=title.trim();
     record.budget=budget;
   }
+
   if(kind==='profiles'){
     const skill=prompt('Especialidad u oficio:',item.skill||'');
     if(skill===null)return;
     record.skill=skill.trim();
   }
+
   record.photos=Array.isArray(item.photos)?item.photos:[];
+
   try{
     await api(`/api/records/${kind}/${id}`,{method:'PUT',body:JSON.stringify(record)});
+    closeDetail();
     await refresh();
     status('Publicación actualizada.');
   }catch(e){
@@ -471,6 +573,7 @@ async function deleteRecord(kind,id){
   if(!confirm('¿Seguro que deseas eliminar esta publicación?'))return;
   try{
     await api(`/api/records/${kind}/${id}`,{method:'DELETE'});
+    closeDetail();
     await refresh();
     status('Publicación eliminada.');
   }catch(e){
