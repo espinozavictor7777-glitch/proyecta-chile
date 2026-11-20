@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -7,7 +8,6 @@
 <meta name="description" content="Proyecta Chile conecta personas, profesionales y proveedores para hacer realidad proyectos.">
 <title>PROYECTA CHILE | Donde tus proyectos se hacen realidad</title>
 <style>
-.hero-image{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:18px;margin:18px 0;border:2px solid rgba(255,255,255,.25)}
 :root{--green:#173d35;--green2:#245c4d;--mint:#eaf2ed;--ink:#1c2923;--muted:#64736b;--line:#dce5df;--paper:#fff;--gold:#f7f0df;--red:#922b2b}
 *{box-sizing:border-box}
 body{margin:0;background:#f4f7f5;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -18,8 +18,10 @@ header{background:linear-gradient(130deg,#173d35,#28634f);color:#fff;padding:22p
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 h1{font-size:clamp(29px,7vw,43px);line-height:1.08;margin:23px 0 9px}
 header p{color:#e0eee5;max-width:680px;margin:0 0 17px}
+.hero-image{min-height:145px;margin:18px 0;border-radius:18px;border:1px solid #668779;background:linear-gradient(120deg,rgba(255,255,255,.08),rgba(255,255,255,.01));display:flex;align-items:center;justify-content:center;text-align:center;padding:25px;color:#e5f1e9;font-size:clamp(20px,5vw,30px);font-weight:800}
 .actions{display:flex;gap:9px;flex-wrap:wrap}
 button{border:0;border-radius:11px;padding:12px 15px;font:700 14px system-ui;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
 .heroBtn{background:#d6ecdd;color:var(--green)}
 .heroAlt{background:transparent;border:1px solid #a9c1b3;color:white}
 nav{display:flex;gap:7px;overflow:auto;padding:11px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
@@ -39,7 +41,7 @@ h3{font-size:17px;margin:18px 0 8px}
 label{display:block;font-size:13px;font-weight:750;margin:12px 0 5px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #cbd8d0;border-radius:10px;background:white;font:inherit;color:var(--ink)}
 textarea{min-height:90px;resize:vertical}
-form button{background:var(--green);color:white;width:100%;margin-top:14px}
+form button,.primary{background:var(--green);color:white;width:100%;margin-top:14px}
 .check{display:flex;gap:9px;align-items:flex-start;font-weight:500}
 .check input{width:auto;margin-top:4px;flex:none}
 .notice{background:var(--gold);border:1px solid #e8dbb9;border-radius:12px;padding:12px;font-size:13px;margin:13px 0}
@@ -49,11 +51,19 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
 .record p{margin:6px 0;color:#46564e;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .record small{color:var(--muted)}
 .empty{padding:18px;text-align:center;background:white;border:1px dashed #c8d6cd;border-radius:14px;color:var(--muted);font-size:13px}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:0}
 .calcresult{font-size:23px;font-weight:850;color:var(--green)}
 .note,footer{font-size:12px;color:var(--muted)}footer{text-align:center;padding:20px}
 .hidden{display:none!important}
+.search{margin:12px 0}
+.photos{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.photos img{width:100px;height:85px;object-fit:cover;border-radius:9px;border:1px solid var(--line)}
+.admin-actions{display:flex;gap:7px;margin-top:12px}
+.admin-actions button{flex:1;background:#edf3ef;color:var(--green)}
+.admin-actions .danger{background:#fff0f0;color:#922b2b}
+.filehint{font-size:12px;color:var(--muted)}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{gap:6px}.stat{padding:9px}.stat b{font-size:20px}.tag{font-size:9px}}
+@media print{header,nav,#globalStatus,footer,.no-print,.admin-actions{display:none!important}body{background:white}main{margin:0;max-width:none}.panel{display:none!important}#presupuesto{display:block!important}.formbox{border:0}}
 </style>
 </head>
 <body>
@@ -62,13 +72,14 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
     <div class="top"><div class="brand">PROYECTA CHILE</div><span class="tag">RED DE PROYECTOS Y SERVICIOS</span></div>
     <h1>Donde tus proyectos se hacen realidad.</h1>
     <p>Conectamos a personas que necesitan realizar trabajos con profesionales y proveedores de su zona.</p>
-    <img class="hero-image" src="file_000000009dd8820eb219d05548cfb2e8.png" alt="Proyecta Chile, participación y oportunidades para todos">
+    <div class="hero-image">Construimos oportunidades. Conectamos soluciones.</div>
     <div class="actions">
       <button class="heroBtn" type="button" onclick="go('nuevo')">＋ Publicar proyecto</button>
       <button class="heroAlt" type="button" onclick="go('perfil')">Inscribir profesional</button>
     </div>
   </div>
 </header>
+
 <nav aria-label="Navegación">
   <button class="active" data-id="inicio" onclick="go('inicio')">Inicio</button>
   <button data-id="nuevo" onclick="go('nuevo')">Proyectos</button>
@@ -76,8 +87,10 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
   <button data-id="comercio" onclick="go('comercio')">Proveedores</button>
   <button data-id="presupuesto" onclick="go('presupuesto')">Presupuesto</button>
 </nav>
+
 <main>
   <div id="globalStatus" class="status" role="status" aria-live="polite">Conectando con la base de datos compartida…</div>
+
   <section id="inicio" class="panel active">
     <h2>Bienvenido a Proyecta Chile</h2>
     <p class="sub">Una red para conectar necesidades, experiencia y soluciones en todo Chile.</p>
@@ -94,6 +107,7 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
     </div>
     <div class="notice">Los perfiles y publicaciones son informados por sus titulares. Proyecta Chile no certifica títulos, experiencia, precios ni antecedentes. Verifica los datos antes de contratar.</div>
   </section>
+
   <section id="nuevo" class="panel">
     <h2>Publicar un proyecto</h2><p class="sub">Comparte tu necesidad con la comunidad.</p>
     <form id="fProject" class="formbox">
@@ -103,11 +117,16 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
       <label for="pDesc">Descripción *</label><textarea id="pDesc" required maxlength="2000" placeholder="Describe el trabajo que necesitas"></textarea>
       <label for="pBudget">Presupuesto estimado (CLP)</label><input id="pBudget" type="number" min="0" max="100000000000" step="1" placeholder="Ej. 1500000">
       <label for="pContact">Contacto público (opcional)</label><input id="pContact" maxlength="120" placeholder="Teléfono o correo">
+      <label for="pPhotos">Fotografías (opcional)</label><input id="pPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+      <p class="filehint">Máximo 5 MB por fotografía. Usa imágenes relacionadas con el proyecto.</p>
       <label class="check"><input id="pConsent" type="checkbox" required> Autorizo que esta publicación y el contacto indicado sean visibles públicamente.</label>
       <button type="submit">Publicar proyecto</button><p class="note">No incluyas claves, documentos de identidad ni datos bancarios.</p>
     </form>
-    <h3>Proyectos publicados</h3><div id="projectsList" class="empty">Cargando…</div>
+    <h3>Proyectos publicados</h3>
+    <input class="search" id="searchProjects" placeholder="Buscar por trabajo, comuna o descripción…" oninput="render()">
+    <div id="projectsList" class="empty">Cargando…</div>
   </section>
+
   <section id="perfil" class="panel">
     <h2>Inscribir profesional</h2><p class="sub">Crea una ficha para aparecer en el directorio público.</p>
     <form id="fProfile" class="formbox">
@@ -116,11 +135,16 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
       <label for="proArea">Comuna o zona de atención *</label><input id="proArea" required maxlength="120" placeholder="Ej. María Pinto y Melipilla">
       <label for="proBio">Experiencia y presentación</label><textarea id="proBio" maxlength="2000"></textarea>
       <label for="proContact">Contacto público *</label><input id="proContact" required maxlength="120" placeholder="Teléfono o correo">
+      <label for="proPhotos">Fotografías (opcional)</label><input id="proPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+      <p class="filehint">Máximo 5 MB por fotografía.</p>
       <label class="check"><input id="proConsent" type="checkbox" required> Autorizo publicar estos datos en el directorio.</label>
       <button type="submit">Guardar perfil profesional</button><p class="note">La inscripción no constituye acreditación ni certificación profesional.</p>
     </form>
-    <h3>Directorio de profesionales</h3><div id="profilesList" class="empty">Cargando…</div>
+    <h3>Directorio de profesionales</h3>
+    <input class="search" id="searchProfiles" placeholder="Buscar por nombre, oficio o comuna…" oninput="render()">
+    <div id="profilesList" class="empty">Cargando…</div>
   </section>
+
   <section id="comercio" class="panel">
     <h2>Registrar proveedor</h2><p class="sub">Ficha pública para ferreterías, comercios y proveedores.</p>
     <form id="fStore" class="formbox">
@@ -128,86 +152,404 @@ form button{background:var(--green);color:white;width:100%;margin-top:14px}
       <label for="sArea">Comuna o zona *</label><input id="sArea" required maxlength="120">
       <label for="sProducts">Productos o servicios</label><textarea id="sProducts" maxlength="2000" placeholder="Ej. materiales, áridos, herramientas"></textarea>
       <label for="sContact">Contacto comercial *</label><input id="sContact" required maxlength="120">
+      <label for="sPhotos">Fotografías (opcional)</label><input id="sPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+      <p class="filehint">Máximo 5 MB por fotografía.</p>
       <label class="check"><input id="sConsent" type="checkbox" required> Autorizo publicar estos datos.</label>
       <button type="submit">Registrar proveedor</button>
     </form>
-    <h3>Proveedores registrados</h3><div id="storesList" class="empty">Cargando…</div>
+    <h3>Proveedores registrados</h3>
+    <input class="search" id="searchStores" placeholder="Buscar por comercio, productos o comuna…" oninput="render()">
+    <div id="storesList" class="empty">Cargando…</div>
   </section>
+
   <section id="presupuesto" class="panel">
     <h2>Calculadora de presupuesto</h2><p class="sub">Estimación orientativa con los valores que ingreses.</p>
     <div class="formbox">
+      <label for="budgetTitle">Nombre del proyecto</label><input id="budgetTitle" placeholder="Ej. Ampliación de vivienda">
       <label for="cMaterials">Materiales ($)</label><input id="cMaterials" type="number" min="0" value="0">
       <label for="cLabor">Mano de obra ($)</label><input id="cLabor" type="number" min="0" value="0">
       <label for="cOther">Transporte y equipos ($)</label><input id="cOther" type="number" min="0" value="0">
       <label for="cExtra">Imprevistos</label><select id="cExtra"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option><option value="20">20%</option></select>
-      <button type="button" onclick="calculate()">Calcular total estimado</button>
+      <label for="budgetNotes">Observaciones</label><textarea id="budgetNotes" placeholder="Detalles adicionales de esta estimación"></textarea>
+      <button type="button" class="primary no-print" onclick="calculate()">Calcular total estimado</button>
       <div class="record"><small>Total estimado</small><div id="calcResult" class="calcresult">$0</div></div>
+      <div class="row no-print">
+        <button type="button" class="primary" onclick="saveBudget()">Guardar en este dispositivo</button>
+        <button type="button" class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+      </div>
+      <p class="note">El presupuesto guardado queda en el navegador de este dispositivo. No se comparte con otros usuarios ni se guarda en la base de datos.</p>
+      <h3 class="no-print">Presupuestos guardados en este dispositivo</h3>
+      <div id="savedBudgets" class="no-print"></div>
       <p class="note">No consulta precios de mercado ni reemplaza una cotización profesional.</p>
     </div>
   </section>
+
+  <section id="administracion" class="panel">
+    <h2>Administración</h2>
+    <p class="sub">Acceso reservado para administrar las publicaciones.</p>
+    <form id="adminLogin" class="formbox">
+      <label for="adminPassword">Clave de administración</label>
+      <input id="adminPassword" type="password" autocomplete="current-password" required>
+      <button type="submit">Ingresar</button>
+    </form>
+    <div id="adminPanel" class="formbox hidden">
+      <p>Sesión de administración activa.</p>
+      <button type="button" class="primary" onclick="logoutAdmin()">Cerrar sesión</button>
+      <p class="note">Los botones de editar y eliminar aparecerán en las publicaciones.</p>
+    </div>
+  </section>
 </main>
-<footer>PROYECTA CHILE · Donde tus proyectos se hacen realidad.<br>Plataforma comunitaria. Verifica los antecedentes antes de contratar.</footer>
+
+<footer>
+  PROYECTA CHILE · Donde tus proyectos se hacen realidad.
+  <br>Plataforma comunitaria. Verifica los antecedentes antes de contratar.
+  <br><button type="button" onclick="go('administracion')">Administración</button>
+</footer>
+
 <script>
 'use strict';
+
 const $=id=>document.getElementById(id);
 let cache={projects:[],profiles:[],stores:[]};
-function status(msg,error=false){const e=$('globalStatus');e.textContent=msg;e.classList.toggle('error',error);}
+let adminToken=sessionStorage.getItem('pc_admin_token')||'';
+
+function status(msg,error=false){
+  const e=$('globalStatus');
+  e.textContent=msg;
+  e.classList.toggle('error',error);
+}
+
 function go(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   window.scrollTo({top:0,behavior:'smooth'});
-  if(id!=='presupuesto')refresh();
+  if(id!=='presupuesto'&&id!=='administracion')refresh();
 }
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function money(v){return '$'+Number(v||0).toLocaleString('es-CL');}
-function card(x,kind){
-  const meta=kind==='profiles'?`${esc(x.skill)} · ${esc(x.area)}`:esc(x.area);
-  const extra=kind==='projects'?`<p><b>Presupuesto:</b> ${x.budget==null?'No informado':money(x.budget)}</p>`:'';
-  return `<article class="record"><strong>${esc(x.name)}</strong><small>${meta}</small><p>${esc(x.description||'')}</p>${extra}<p><b>Contacto:</b> ${esc(x.contact||'No informado')}</p></article>`;
+
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function render(){
-  $('nProjects').textContent=cache.projects.length;$('nProfiles').textContent=cache.profiles.length;$('nStores').textContent=cache.stores.length;
-  const sets=[['projectsList','projects','Todavía no hay proyectos publicados.'],['profilesList','profiles','Todavía no hay profesionales publicados.'],['storesList','stores','Todavía no hay proveedores publicados.']];
-  for(const [id,key,empty] of sets){
-    const el=$(id),a=cache[key];el.innerHTML=a.length?a.map(x=>card(x,key)).join():'';
-    if(!a.length){el.className='empty';el.textContent=empty;}else{el.className='';}
-  }
+
+function money(v){
+  return '$'+Number(v||0).toLocaleString('es-CL');
 }
+
 async function api(path,options={}){
-  const res=await fetch(path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});
+  const headers={...(options.headers||{})};
+  if(adminToken)headers.Authorization='Bearer '+adminToken;
+  if(options.body && !(options.body instanceof FormData))headers['Content-Type']='application/json';
+  const res=await fetch(path,{...options,headers});
   const data=await res.json().catch(()=>({error:'Respuesta inválida del servidor'}));
   if(!res.ok)throw new Error(data.error||'No se pudo completar la operación');
   return data;
 }
+
+function safePhoto(url){
+  if(typeof url!=='string')return '';
+  if(url.startsWith('/api/photo/'))return url;
+  try{
+    const u=new URL(url);
+    if(u.protocol==='https:')return u.href;
+  }catch(e){}
+  return '';
+}
+
+function photosHTML(photos){
+  if(!Array.isArray(photos))return '';
+  const valid=photos.map(safePhoto).filter(Boolean);
+  if(!valid.length)return '';
+  return '<div class="photos">'+valid.map(url=>`<img src="${esc(url)}" loading="lazy" alt="Fotografía de publicación">`).join('')+'</div>';
+}
+
+function adminButtons(x,kind){
+  if(!adminToken||!x.id)return '';
+  return `<div class="admin-actions">
+    <button type="button" onclick="editRecord('${kind}',${Number(x.id)})">Editar</button>
+    <button type="button" class="danger" onclick="deleteRecord('${kind}',${Number(x.id)})">Eliminar</button>
+  </div>`;
+}
+
+function card(x,kind){
+  const meta=kind==='profiles'
+    ?`${esc(x.skill||'')} · ${esc(x.area||'')}`
+    :esc(x.area||'');
+  const extra=kind==='projects'
+    ?`<p><b>Presupuesto:</b> ${x.budget==null||x.budget===''?'No informado':money(x.budget)}</p>`
+    :'';
+  return `<article class="record">
+    <strong>${esc(x.name)}</strong>
+    <small>${meta}</small>
+    <p>${esc(x.description||'')}</p>
+    ${extra}
+    ${photosHTML(x.photos)}
+    <p><b>Contacto:</b> ${esc(x.contact||'No informado')}</p>
+    ${adminButtons(x,kind)}
+  </article>`;
+}
+
+function render(){
+  $('nProjects').textContent=cache.projects.length;
+  $('nProfiles').textContent=cache.profiles.length;
+  $('nStores').textContent=cache.stores.length;
+
+  const sets=[
+    ['projectsList','projects','Todavía no hay proyectos publicados.','searchProjects'],
+    ['profilesList','profiles','Todavía no hay profesionales publicados.','searchProfiles'],
+    ['storesList','stores','Todavía no hay proveedores publicados.','searchStores']
+  ];
+
+  for(const [id,key,empty,searchId] of sets){
+    const el=$(id);
+    const q=($(searchId)?.value||'').trim().toLocaleLowerCase('es');
+    const list=cache[key].filter(x=>{
+      const text=[x.name,x.skill,x.area,x.description,x.contact].join(' ').toLocaleLowerCase('es');
+      return text.includes(q);
+    });
+    el.innerHTML=list.length?list.map(x=>card(x,key)).join(''):'';
+    if(!list.length){
+      el.className='empty';
+      el.textContent=q?'No hay resultados para esa búsqueda.':empty;
+    }else{
+      el.className='';
+    }
+  }
+}
+
 async function refresh(){
   try{
     const d=await api('/api/records');
-    cache={projects:d.projects||[],profiles:d.profiles||[],stores:d.stores||[]};
-    render();status('Conectado. Los registros se comparten entre todos los teléfonos.');
-  }catch(e){status('La plataforma todavía no está conectada a su base compartida: '+e.message,true);}
+    cache={
+      projects:Array.isArray(d.projects)?d.projects:[],
+      profiles:Array.isArray(d.profiles)?d.profiles:[],
+      stores:Array.isArray(d.stores)?d.stores:[]
+    };
+    render();
+    status('Conectado. Los registros se comparten entre todos los teléfonos.');
+  }catch(e){
+    status('No se pudo consultar la base compartida. '+e.message,true);
+  }
 }
-async function submitRecord(type,record,form){
+
+async function uploadPhotos(inputId){
+  const files=$(inputId).files;
+  const urls=[];
+  for(const file of files){
+    if(file.size>5*1024*1024)throw new Error('Una fotografía supera el máximo de 5 MB.');
+    const form=new FormData();
+    form.append('file',file);
+    const result=await api('/api/upload',{method:'POST',body:form});
+    if(result.url)urls.push(result.url);
+    else throw new Error('El servidor no devolvió la dirección de la fotografía.');
+  }
+  return urls;
+}
+
+async function submitRecord(type,record,form,fileInput){
   try{
     status('Guardando publicación…');
+    const photos=await uploadPhotos(fileInput);
+    record.photos=photos;
     await api('/api/records',{method:'POST',body:JSON.stringify({type,record})});
-    form.reset();await refresh();status('¡Publicado correctamente! Ya está disponible para todos los visitantes.');
-  }catch(e){status('No se pudo guardar: '+e.message,true);}
+    form.reset();
+    await refresh();
+    status('¡Publicado correctamente! Ya está disponible para los visitantes.');
+  }catch(e){
+    status('No se pudo guardar: '+e.message,true);
+  }
 }
+
 $('fProject').addEventListener('submit',e=>{
-  e.preventDefault();submitRecord('project',{name:$('pType').value,area:$('pCommune').value.trim(),description:$('pDesc').value.trim(),budget:$('pBudget').value,contact:$('pContact').value.trim()},e.currentTarget);
+  e.preventDefault();
+  submitRecord('project',{
+    name:$('pType').value,
+    area:$('pCommune').value.trim(),
+    description:$('pDesc').value.trim(),
+    budget:$('pBudget').value,
+    contact:$('pContact').value.trim()
+  },e.currentTarget,'pPhotos');
 });
+
 $('fProfile').addEventListener('submit',e=>{
-  e.preventDefault();submitRecord('profile',{name:$('proName').value.trim(),skill:$('proSkill').value.trim(),area:$('proArea').value.trim(),description:$('proBio').value.trim(),contact:$('proContact').value.trim()},e.currentTarget);
+  e.preventDefault();
+  submitRecord('profile',{
+    name:$('proName').value.trim(),
+    skill:$('proSkill').value.trim(),
+    area:$('proArea').value.trim(),
+    description:$('proBio').value.trim(),
+    contact:$('proContact').value.trim()
+  },e.currentTarget,'proPhotos');
 });
+
 $('fStore').addEventListener('submit',e=>{
-  e.preventDefault();submitRecord('store',{name:$('sName').value.trim(),area:$('sArea').value.trim(),description:$('sProducts').value.trim(),contact:$('sContact').value.trim()},e.currentTarget);
+  e.preventDefault();
+  submitRecord('store',{
+    name:$('sName').value.trim(),
+    area:$('sArea').value.trim(),
+    description:$('sProducts').value.trim(),
+    contact:$('sContact').value.trim()
+  },e.currentTarget,'sPhotos');
 });
+
+async function verifyAdmin(){
+  if(!adminToken)return;
+  try{
+    await api('/api/admin/check');
+    $('adminLogin').classList.add('hidden');
+    $('adminPanel').classList.remove('hidden');
+    render();
+  }catch(e){
+    adminToken='';
+    sessionStorage.removeItem('pc_admin_token');
+    $('adminLogin').classList.remove('hidden');
+    $('adminPanel').classList.add('hidden');
+  }
+}
+
+$('adminLogin').addEventListener('submit',async e=>{
+  e.preventDefault();
+  try{
+    status('Verificando acceso…');
+    const result=await api('/api/admin/login',{
+      method:'POST',
+      body:JSON.stringify({password:$('adminPassword').value})
+    });
+    if(!result.token)throw new Error('El servidor no entregó una sesión válida.');
+    adminToken=result.token;
+    sessionStorage.setItem('pc_admin_token',adminToken);
+    $('adminPassword').value='';
+    $('adminLogin').classList.add('hidden');
+    $('adminPanel').classList.remove('hidden');
+    await refresh();
+    status('Administración activada.');
+  }catch(e){
+    status('No se pudo iniciar sesión: '+e.message,true);
+  }
+});
+
+function logoutAdmin(){
+  adminToken='';
+  sessionStorage.removeItem('pc_admin_token');
+  $('adminLogin').classList.remove('hidden');
+  $('adminPanel').classList.add('hidden');
+  render();
+  status('Sesión de administración cerrada.');
+}
+
+async function editRecord(kind,id){
+  const item=cache[kind].find(x=>Number(x.id)===Number(id));
+  if(!item)return;
+  const name=prompt('Nombre o tipo de publicación:',item.name||'');
+  if(name===null)return;
+  const area=prompt('Comuna o zona:',item.area||'');
+  if(area===null)return;
+  const description=prompt('Descripción:',item.description||'');
+  if(description===null)return;
+  const contact=prompt('Contacto público:',item.contact||'');
+  if(contact===null)return;
+  const record={name:name.trim(),area:area.trim(),description:description.trim(),contact:contact.trim()};
+  if(kind==='projects'){
+    const budget=prompt('Presupuesto estimado:',item.budget??'');
+    if(budget===null)return;
+    record.budget=budget;
+  }
+  if(kind==='profiles'){
+    const skill=prompt('Especialidad u oficio:',item.skill||'');
+    if(skill===null)return;
+    record.skill=skill.trim();
+  }
+  record.photos=Array.isArray(item.photos)?item.photos:[];
+  try{
+    await api(`/api/records/${kind}/${id}`,{method:'PUT',body:JSON.stringify(record)});
+    await refresh();
+    status('Publicación actualizada.');
+  }catch(e){
+    status('No se pudo editar: '+e.message,true);
+  }
+}
+
+async function deleteRecord(kind,id){
+  if(!confirm('¿Seguro que deseas eliminar esta publicación?'))return;
+  try{
+    await api(`/api/records/${kind}/${id}`,{method:'DELETE'});
+    await refresh();
+    status('Publicación eliminada.');
+  }catch(e){
+    status('No se pudo eliminar: '+e.message,true);
+  }
+}
+
 function calculate(){
   const n=id=>Math.max(0,Number($(id).value)||0);
   const total=(n('cMaterials')+n('cLabor')+n('cOther'))*(1+n('cExtra')/100);
   $('calcResult').textContent=money(total);
+  return total;
 }
+
+function saveBudget(){
+  const item={
+    title:$('budgetTitle').value.trim()||'Presupuesto sin título',
+    materials:Number($('cMaterials').value)||0,
+    labor:Number($('cLabor').value)||0,
+    other:Number($('cOther').value)||0,
+    extra:Number($('cExtra').value)||0,
+    notes:$('budgetNotes').value.trim(),
+    total:calculate(),
+    date:new Date().toLocaleString('es-CL')
+  };
+  try{
+    const saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');
+    saved.unshift(item);
+    localStorage.setItem('pc_budgets',JSON.stringify(saved.slice(0,30)));
+    showSavedBudgets();
+    status('Presupuesto guardado en este dispositivo.');
+  }catch(e){
+    status('No se pudo guardar el presupuesto en este dispositivo.',true);
+  }
+}
+
+function showSavedBudgets(){
+  const el=$('savedBudgets');
+  let saved=[];
+  try{saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');}catch(e){}
+  if(!saved.length){
+    el.innerHTML='<div class="empty">Todavía no hay presupuestos guardados.</div>';
+    return;
+  }
+  el.innerHTML=saved.map((b,i)=>`
+    <article class="record">
+      <strong>${esc(b.title)}</strong>
+      <small>${esc(b.date||'')}</small>
+      <p>Total: <b>${money(b.total)}</b></p>
+      <button type="button" onclick="loadBudget(${i})">Abrir presupuesto</button>
+      <button type="button" onclick="deleteBudget(${i})">Eliminar</button>
+    </article>`).join('');
+}
+
+function loadBudget(index){
+  const saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');
+  const b=saved[index];
+  if(!b)return;
+  $('budgetTitle').value=b.title||'';
+  $('cMaterials').value=b.materials||0;
+  $('cLabor').value=b.labor||0;
+  $('cOther').value=b.other||0;
+  $('cExtra').value=b.extra||0;
+  $('budgetNotes').value=b.notes||'';
+  calculate();
+  go('presupuesto');
+}
+
+function deleteBudget(index){
+  if(!confirm('¿Eliminar este presupuesto guardado en el dispositivo?'))return;
+  const saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');
+  saved.splice(index,1);
+  localStorage.setItem('pc_budgets',JSON.stringify(saved));
+  showSavedBudgets();
+}
+
+verifyAdmin();
 refresh();
+showSavedBudgets();
 setInterval(refresh,60000);
 </script>
 </body>
