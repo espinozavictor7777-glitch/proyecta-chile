@@ -8,7 +8,7 @@
 <meta name="description" content="Proyecta Chile conecta personas, profesionales y proveedores para hacer realidad proyectos.">
 <title>PROYECTA CHILE | Donde tus proyectos se hacen realidad</title>
 <style>
-:root{--green:#173d35;--green2:#245c4d;--mint:#eaf2ed;--ink:#1c2923;--muted:#64736b;--line:#dce5df;--paper:#fff;--gold:#f7f0df;--red:#922b2b}
+:root{--green:#173d35;--green2:#245c4d;--mint:#eaf2ed;--ink:#1c2923;--muted:#64736b;--line:#dce5df;--gold:#f7f0df;--red:#922b2b}
 *{box-sizing:border-box}
 body{margin:0;background:#f4f7f5;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 header{background:linear-gradient(130deg,#173d35,#28634f);color:#fff;padding:22px 16px 28px}
@@ -79,160 +79,166 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 .contact-actions{display:grid;gap:9px;margin:18px 0}
 .contact-button{display:block;text-align:center;text-decoration:none;border-radius:11px;padding:13px 15px;font:700 14px system-ui;background:#16834b;color:white}
 .contact-button.email{background:var(--green)}
+.quote-box{background:#f2f6f3;border:1px solid var(--line);border-radius:13px;padding:15px;margin:18px 0}
+.quote-box h3{margin:0 0 5px;color:var(--green)}
+.quote-card{background:white;border:1px solid var(--line);border-radius:13px;padding:14px;margin:10px 0}
+.quote-card h3{margin:0 0 8px}
+.quote-card p{margin:5px 0;font-size:14px}
+.quote-card select{margin-top:5px}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{gap:6px}.stat{padding:9px}.stat b{font-size:20px}.tag{font-size:9px}}
 @media print{header,nav,#globalStatus,footer,.no-print,.admin-actions,.detail-overlay{display:none!important}body{background:white}main{margin:0;max-width:none}.panel{display:none!important}#presupuesto{display:block!important}.formbox{border:0}}
 </style>
 </head>
 <body>
 <header>
-  <div class="wrap">
-    <div class="top"><div class="brand">PROYECTA CHILE</div><span class="tag">RED DE PROYECTOS Y SERVICIOS</span></div>
-    <h1>Donde tus proyectos se hacen realidad.</h1>
-    <p>Conectamos a personas que necesitan realizar trabajos con profesionales y proveedores de su zona.</p>
-    <div class="hero-image">Construimos oportunidades. Conectamos soluciones.</div>
-    <div class="actions">
-      <button class="heroBtn" type="button" onclick="go('nuevo')">＋ Publicar proyecto</button>
-      <button class="heroAlt" type="button" onclick="go('perfil')">Inscribir profesional</button>
-    </div>
-  </div>
+<div class="wrap">
+<div class="top"><div class="brand">PROYECTA CHILE</div><span class="tag">RED DE PROYECTOS Y SERVICIOS</span></div>
+<h1>Donde tus proyectos se hacen realidad.</h1>
+<p>Conectamos a personas que necesitan realizar trabajos con profesionales y proveedores de su zona.</p>
+<div class="hero-image">Construimos oportunidades. Conectamos soluciones.</div>
+<div class="actions">
+<button class="heroBtn" type="button" onclick="go('nuevo')">＋ Publicar proyecto</button>
+<button class="heroAlt" type="button" onclick="go('perfil')">Inscribir profesional</button>
+</div>
+</div>
 </header>
 
 <nav aria-label="Navegación">
-  <button class="active" data-id="inicio" onclick="go('inicio')">Inicio</button>
-  <button data-id="nuevo" onclick="go('nuevo')">Proyectos</button>
-  <button data-id="perfil" onclick="go('perfil')">Profesionales</button>
-  <button data-id="comercio" onclick="go('comercio')">Proveedores</button>
-  <button data-id="presupuesto" onclick="go('presupuesto')">Presupuesto</button>
+<button class="active" data-id="inicio" onclick="go('inicio')">Inicio</button>
+<button data-id="nuevo" onclick="go('nuevo')">Proyectos</button>
+<button data-id="perfil" onclick="go('perfil')">Profesionales</button>
+<button data-id="comercio" onclick="go('comercio')">Proveedores</button>
+<button data-id="presupuesto" onclick="go('presupuesto')">Presupuesto</button>
 </nav>
 
 <main>
-  <div id="globalStatus" class="status" role="status" aria-live="polite">Conectando con la base de datos compartida…</div>
+<div id="globalStatus" class="status" role="status" aria-live="polite">Conectando con la base de datos compartida…</div>
 
-  <section id="inicio" class="panel active">
-    <h2>Bienvenido a Proyecta Chile</h2>
-    <p class="sub">Una red para conectar necesidades, experiencia y soluciones en todo Chile.</p>
-    <div class="stats">
-      <div class="stat"><b id="nProjects">0</b><span>Proyectos</span></div>
-      <div class="stat"><b id="nProfiles">0</b><span>Profesionales</span></div>
-      <div class="stat"><b id="nStores">0</b><span>Proveedores</span></div>
-    </div>
-    <div class="grid">
-      <div class="card" onclick="go('nuevo')"><div class="symbol">🏠</div><h3>Publicar un proyecto</h3><p>Explica qué necesitas, dónde y cuál es tu presupuesto.</p></div>
-      <div class="card" onclick="go('perfil')"><div class="symbol">🧰</div><h3>Directorio profesional</h3><p>Encuentra y registra especialistas y oficios.</p></div>
-      <div class="card" onclick="go('comercio')"><div class="symbol">🧱</div><h3>Proveedores</h3><p>Conoce comercios, materiales y servicios.</p></div>
-      <div class="card" onclick="go('presupuesto')"><div class="symbol">🧮</div><h3>Calculadora</h3><p>Prepara una estimación inicial de costos.</p></div>
-    </div>
-    <div class="notice">Los perfiles y publicaciones son informados por sus titulares. Proyecta Chile no certifica títulos, experiencia, precios ni antecedentes. Verifica los datos antes de contratar.</div>
-  </section>
+<section id="inicio" class="panel active">
+<h2>Bienvenido a Proyecta Chile</h2>
+<p class="sub">Una red para conectar necesidades, experiencia y soluciones en todo Chile.</p>
+<div class="stats">
+<div class="stat"><b id="nProjects">0</b><span>Proyectos</span></div>
+<div class="stat"><b id="nProfiles">0</b><span>Profesionales</span></div>
+<div class="stat"><b id="nStores">0</b><span>Proveedores</span></div>
+</div>
+<div class="grid">
+<div class="card" onclick="go('nuevo')"><div class="symbol">🏠</div><h3>Publicar un proyecto</h3><p>Explica qué necesitas, dónde y cuál es tu presupuesto.</p></div>
+<div class="card" onclick="go('perfil')"><div class="symbol">🧰</div><h3>Directorio profesional</h3><p>Encuentra y registra especialistas y oficios.</p></div>
+<div class="card" onclick="go('comercio')"><div class="symbol">🧱</div><h3>Proveedores</h3><p>Conoce comercios, materiales y servicios.</p></div>
+<div class="card" onclick="go('presupuesto')"><div class="symbol">🧮</div><h3>Calculadora</h3><p>Prepara una estimación inicial de costos.</p></div>
+</div>
+<div class="notice">Los perfiles y publicaciones son informados por sus titulares. Proyecta Chile no certifica títulos, experiencia, precios ni antecedentes. Verifica los datos antes de contratar.</div>
+</section>
 
-  <section id="nuevo" class="panel">
-    <h2>Publicar un proyecto</h2><p class="sub">Comparte tu necesidad con la comunidad.</p>
-    <form id="fProject" class="formbox">
-      <label for="pTitle">Título del proyecto *</label>
-      <input id="pTitle" required maxlength="150" placeholder="Ej. Ampliación de vivienda en María Pinto">
-      <label for="pType">Tipo de trabajo *</label>
-      <select id="pType" required><option value="">Selecciona</option><option>Construcción</option><option>Ampliación</option><option>Remodelación</option><option>Electricidad</option><option>Gasfitería</option><option>Pintura</option><option>Carpintería</option><option>Jardinería</option><option>Otro</option></select>
-      <label for="pCommune">Comuna o localidad *</label><input id="pCommune" required maxlength="100" placeholder="Ej. María Pinto">
-      <label for="pDesc">Descripción *</label><textarea id="pDesc" required maxlength="2000" placeholder="Describe el trabajo que necesitas"></textarea>
-      <label for="pBudget">Presupuesto estimado (CLP)</label><input id="pBudget" type="number" min="0" max="100000000000" step="1" placeholder="Ej. 1500000">
-      <label for="pContact">Contacto público (opcional)</label><input id="pContact" maxlength="120" placeholder="Teléfono o correo">
-      <label for="pPhotos">Fotografías (opcional)</label><input id="pPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-      <p class="filehint">Máximo 5 MB por fotografía. Usa imágenes relacionadas con el proyecto.</p>
-      <label class="check"><input id="pConsent" type="checkbox" required> Autorizo que esta publicación y el contacto indicado sean visibles públicamente.</label>
-      <button type="submit">Publicar proyecto</button><p class="note">No incluyas claves, documentos de identidad ni datos bancarios.</p>
-    </form>
-    <h3>Proyectos publicados</h3>
-    <input class="search" id="searchProjects" placeholder="Buscar por título, trabajo, comuna o descripción…" oninput="render()">
-    <div id="projectsList" class="empty">Cargando…</div>
-  </section>
+<section id="nuevo" class="panel">
+<h2>Publicar un proyecto</h2><p class="sub">Comparte tu necesidad con la comunidad.</p>
+<form id="fProject" class="formbox">
+<label for="pTitle">Título del proyecto *</label><input id="pTitle" required maxlength="150" placeholder="Ej. Ampliación de vivienda">
+<label for="pType">Tipo de trabajo *</label>
+<select id="pType" required><option value="">Selecciona</option><option>Construcción</option><option>Ampliación</option><option>Remodelación</option><option>Electricidad</option><option>Gasfitería</option><option>Pintura</option><option>Carpintería</option><option>Jardinería</option><option>Otro</option></select>
+<label for="pCommune">Comuna o localidad *</label><input id="pCommune" required maxlength="100" placeholder="Ej. María Pinto">
+<label for="pDesc">Descripción *</label><textarea id="pDesc" required maxlength="2000" placeholder="Describe el trabajo que necesitas"></textarea>
+<label for="pBudget">Presupuesto estimado (CLP)</label><input id="pBudget" type="number" min="0" max="100000000000" step="1" placeholder="Ej. 1500000">
+<label for="pContact">Contacto público (opcional)</label><input id="pContact" maxlength="120" placeholder="Teléfono o correo">
+<label for="pPhotos">Fotografías (opcional)</label><input id="pPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+<p class="filehint">Máximo 5 MB por fotografía.</p>
+<label class="check"><input id="pConsent" type="checkbox" required> Autorizo que esta publicación y el contacto indicado sean visibles públicamente.</label>
+<button type="submit">Publicar proyecto</button><p class="note">No incluyas claves, documentos de identidad ni datos bancarios.</p>
+</form>
+<h3>Proyectos publicados</h3>
+<input class="search" id="searchProjects" placeholder="Buscar por título, trabajo, comuna o descripción…" oninput="render()">
+<div id="projectsList" class="empty">Cargando…</div>
+</section>
 
-  <section id="perfil" class="panel">
-    <h2>Inscribir profesional</h2><p class="sub">Crea una ficha para aparecer en el directorio público.</p>
-    <form id="fProfile" class="formbox">
-      <label for="proName">Nombre o nombre comercial *</label><input id="proName" required maxlength="120">
-      <label for="proSkill">Especialidad u oficio *</label><input id="proSkill" required maxlength="120" placeholder="Ej. Electricista, maestro constructor">
-      <label for="proArea">Comuna o zona de atención *</label><input id="proArea" required maxlength="120" placeholder="Ej. María Pinto y Melipilla">
-      <label for="proBio">Experiencia y presentación</label><textarea id="proBio" maxlength="2000"></textarea>
-      <label for="proContact">Contacto público *</label><input id="proContact" required maxlength="120" placeholder="Teléfono o correo">
-      <label for="proPhotos">Fotografías (opcional)</label><input id="proPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-      <p class="filehint">Máximo 5 MB por fotografía.</p>
-      <label class="check"><input id="proConsent" type="checkbox" required> Autorizo publicar estos datos en el directorio.</label>
-      <button type="submit">Guardar perfil profesional</button><p class="note">La inscripción no constituye acreditación ni certificación profesional.</p>
-    </form>
-    <h3>Directorio de profesionales</h3>
-    <input class="search" id="searchProfiles" placeholder="Buscar por nombre, oficio o comuna…" oninput="render()">
-    <div id="profilesList" class="empty">Cargando…</div>
-  </section>
+<section id="perfil" class="panel">
+<h2>Inscribir profesional</h2><p class="sub">Crea una ficha para aparecer en el directorio público.</p>
+<form id="fProfile" class="formbox">
+<label for="proName">Nombre o nombre comercial *</label><input id="proName" required maxlength="120">
+<label for="proSkill">Especialidad u oficio *</label><input id="proSkill" required maxlength="120" placeholder="Ej. Electricista, maestro constructor">
+<label for="proArea">Comuna o zona de atención *</label><input id="proArea" required maxlength="120" placeholder="Ej. María Pinto y Melipilla">
+<label for="proBio">Experiencia y presentación</label><textarea id="proBio" maxlength="2000"></textarea>
+<label for="proContact">Contacto público *</label><input id="proContact" required maxlength="120" placeholder="Teléfono o correo">
+<label for="proPhotos">Fotografías (opcional)</label><input id="proPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+<p class="filehint">Máximo 5 MB por fotografía.</p>
+<label class="check"><input id="proConsent" type="checkbox" required> Autorizo publicar estos datos en el directorio.</label>
+<button type="submit">Guardar perfil profesional</button><p class="note">La inscripción no constituye acreditación ni certificación profesional.</p>
+</form>
+<h3>Directorio de profesionales</h3>
+<input class="search" id="searchProfiles" placeholder="Buscar por nombre, oficio o comuna…" oninput="render()">
+<div id="profilesList" class="empty">Cargando…</div>
+</section>
 
-  <section id="comercio" class="panel">
-    <h2>Registrar proveedor</h2><p class="sub">Ficha pública para ferreterías, comercios y proveedores.</p>
-    <form id="fStore" class="formbox">
-      <label for="sName">Nombre del comercio *</label><input id="sName" required maxlength="120">
-      <label for="sArea">Comuna o zona *</label><input id="sArea" required maxlength="120">
-      <label for="sProducts">Productos o servicios</label><textarea id="sProducts" maxlength="2000" placeholder="Ej. materiales, áridos, herramientas"></textarea>
-      <label for="sContact">Contacto comercial *</label><input id="sContact" required maxlength="120">
-      <label for="sPhotos">Fotografías (opcional)</label><input id="sPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-      <p class="filehint">Máximo 5 MB por fotografía.</p>
-      <label class="check"><input id="sConsent" type="checkbox" required> Autorizo publicar estos datos.</label>
-      <button type="submit">Registrar proveedor</button>
-    </form>
-    <h3>Proveedores registrados</h3>
-    <input class="search" id="searchStores" placeholder="Buscar por comercio, productos o comuna…" oninput="render()">
-    <div id="storesList" class="empty">Cargando…</div>
-  </section>
+<section id="comercio" class="panel">
+<h2>Registrar proveedor</h2><p class="sub">Ficha pública para ferreterías, comercios y proveedores.</p>
+<form id="fStore" class="formbox">
+<label for="sName">Nombre del comercio *</label><input id="sName" required maxlength="120">
+<label for="sArea">Comuna o zona *</label><input id="sArea" required maxlength="120">
+<label for="sProducts">Productos o servicios</label><textarea id="sProducts" maxlength="2000" placeholder="Ej. materiales, áridos, herramientas"></textarea>
+<label for="sContact">Contacto comercial *</label><input id="sContact" required maxlength="120">
+<label for="sPhotos">Fotografías (opcional)</label><input id="sPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+<p class="filehint">Máximo 5 MB por fotografía.</p>
+<label class="check"><input id="sConsent" type="checkbox" required> Autorizo publicar estos datos.</label>
+<button type="submit">Registrar proveedor</button>
+</form>
+<h3>Proveedores registrados</h3>
+<input class="search" id="searchStores" placeholder="Buscar por comercio, productos o comuna…" oninput="render()">
+<div id="storesList" class="empty">Cargando…</div>
+</section>
 
-  <section id="presupuesto" class="panel">
-    <h2>Calculadora de presupuesto</h2><p class="sub">Estimación orientativa con los valores que ingreses.</p>
-    <div class="formbox">
-      <label for="budgetTitle">Nombre del proyecto</label><input id="budgetTitle" placeholder="Ej. Ampliación de vivienda">
-      <label for="cMaterials">Materiales ($)</label><input id="cMaterials" type="number" min="0" value="0">
-      <label for="cLabor">Mano de obra ($)</label><input id="cLabor" type="number" min="0" value="0">
-      <label for="cOther">Transporte y equipos ($)</label><input id="cOther" type="number" min="0" value="0">
-      <label for="cExtra">Imprevistos</label><select id="cExtra"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option><option value="20">20%</option></select>
-      <label for="budgetNotes">Observaciones</label><textarea id="budgetNotes" placeholder="Detalles adicionales de esta estimación"></textarea>
-      <button type="button" class="primary no-print" onclick="calculate()">Calcular total estimado</button>
-      <div class="record"><small>Total estimado</small><div id="calcResult" class="calcresult">$0</div></div>
-      <div class="row no-print">
-        <button type="button" class="primary" onclick="saveBudget()">Guardar en este dispositivo</button>
-        <button type="button" class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
-      </div>
-      <p class="note">El presupuesto guardado queda en el navegador de este dispositivo. No se comparte con otros usuarios ni se guarda en la base de datos.</p>
-      <h3 class="no-print">Presupuestos guardados en este dispositivo</h3>
-      <div id="savedBudgets" class="no-print"></div>
-      <p class="note">No consulta precios de mercado ni reemplaza una cotización profesional.</p>
-    </div>
-  </section>
+<section id="presupuesto" class="panel">
+<h2>Calculadora de presupuesto</h2><p class="sub">Estimación orientativa con los valores que ingreses.</p>
+<div class="formbox">
+<label for="budgetTitle">Nombre del proyecto</label><input id="budgetTitle" placeholder="Ej. Ampliación de vivienda">
+<label for="cMaterials">Materiales ($)</label><input id="cMaterials" type="number" min="0" value="0">
+<label for="cLabor">Mano de obra ($)</label><input id="cLabor" type="number" min="0" value="0">
+<label for="cOther">Transporte y equipos ($)</label><input id="cOther" type="number" min="0" value="0">
+<label for="cExtra">Imprevistos</label><select id="cExtra"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option><option value="20">20%</option></select>
+<label for="budgetNotes">Observaciones</label><textarea id="budgetNotes" placeholder="Detalles adicionales de esta estimación"></textarea>
+<button type="button" class="primary no-print" onclick="calculate()">Calcular total estimado</button>
+<div class="record"><small>Total estimado</small><div id="calcResult" class="calcresult">$0</div></div>
+<div class="row no-print">
+<button type="button" class="primary" onclick="saveBudget()">Guardar en este dispositivo</button>
+<button type="button" class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+</div>
+<p class="note">El presupuesto guardado queda en el navegador de este dispositivo. No se comparte con otros usuarios ni se guarda en la base de datos.</p>
+<h3 class="no-print">Presupuestos guardados en este dispositivo</h3>
+<div id="savedBudgets" class="no-print"></div>
+<p class="note">No consulta precios de mercado ni reemplaza una cotización profesional.</p>
+</div>
+</section>
 
-  <section id="administracion" class="panel">
-    <h2>Administración</h2>
-    <p class="sub">Acceso reservado para administrar las publicaciones.</p>
-    <form id="adminLogin" class="formbox">
-      <label for="adminPassword">Clave de administración</label>
-      <input id="adminPassword" type="password" autocomplete="current-password" required>
-      <button type="submit">Ingresar</button>
-    </form>
-    <div id="adminPanel" class="formbox hidden">
-      <p>Sesión de administración activa.</p>
-      <button type="button" class="primary" onclick="logoutAdmin()">Cerrar sesión</button>
-      <p class="note">Los botones de editar y eliminar aparecerán en las publicaciones.</p>
-    </div>
-  </section>
+<section id="administracion" class="panel">
+<h2>Administración</h2>
+<p class="sub">Acceso reservado para administrar publicaciones y solicitudes.</p>
+<form id="adminLogin" class="formbox">
+<label for="adminPassword">Clave de administración</label>
+<input id="adminPassword" type="password" autocomplete="current-password" required>
+<button type="submit">Ingresar</button>
+</form>
+<div id="adminPanel" class="formbox hidden">
+<p>Sesión de administración activa.</p>
+<button type="button" class="primary" onclick="logoutAdmin()">Cerrar sesión</button>
+<p class="note">Los botones de editar y eliminar aparecerán en las publicaciones.</p>
+<h3>Solicitudes de cotización recibidas</h3>
+<p class="note">Revisa las solicitudes y actualiza su estado.</p>
+<button type="button" class="primary" onclick="loadQuotes()">Actualizar solicitudes</button>
+<div id="quotesList"><div class="empty">Cargando solicitudes…</div></div>
+</div>
+</section>
 </main>
 
 <div id="detailOverlay" class="detail-overlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle" onclick="if(event.target===this)closeDetail()">
-  <div class="detail-box">
-    <div class="detail-top">
-      <h2 id="detailTitle">Detalle de publicación</h2>
-      <button class="close-detail" type="button" onclick="closeDetail()" aria-label="Cerrar">×</button>
-    </div>
-    <div id="detailContent" class="detail-content"></div>
-  </div>
+<div class="detail-box">
+<div class="detail-top"><h2 id="detailTitle">Detalle de publicación</h2><button class="close-detail" type="button" onclick="closeDetail()" aria-label="Cerrar">×</button></div>
+<div id="detailContent" class="detail-content"></div>
+</div>
 </div>
 
 <footer>
-  PROYECTA CHILE · Donde tus proyectos se hacen realidad.
-  <br>Plataforma comunitaria. Verifica los antecedentes antes de contratar.
-  <br><button type="button" onclick="go('administracion')">Administración</button>
+PROYECTA CHILE · Donde tus proyectos se hacen realidad.
+<br>Plataforma comunitaria. Verifica los antecedentes antes de contratar.
+<br><button type="button" onclick="go('administracion')">Administración</button>
 </footer>
 
 <script>
@@ -241,11 +247,12 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 const $=id=>document.getElementById(id);
 let cache={projects:[],profiles:[],stores:[]};
 let adminToken=sessionStorage.getItem('pc_admin_token')||'';
+let currentQuote=null;
 
 function status(msg,error=false){
-  const e=$('globalStatus');
-  e.textContent=msg;
-  e.classList.toggle('error',error);
+  const el=$('globalStatus');
+  el.textContent=msg;
+  el.classList.toggle('error',error);
 }
 
 function go(id){
@@ -254,6 +261,7 @@ function go(id){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   window.scrollTo({top:0,behavior:'smooth'});
   if(id!=='presupuesto'&&id!=='administracion')refresh();
+  if(id==='administracion'&&adminToken)loadQuotes();
 }
 
 function esc(v){
@@ -267,10 +275,10 @@ function money(v){
 async function api(path,options={}){
   const headers={...(options.headers||{})};
   if(adminToken)headers.Authorization='Bearer '+adminToken;
-  if(options.body && !(options.body instanceof FormData))headers['Content-Type']='application/json';
-  const res=await fetch(path,{...options,headers});
-  const data=await res.json().catch(()=>({error:'Respuesta inválida del servidor'}));
-  if(!res.ok)throw new Error(data.error||'No se pudo completar la operación');
+  if(options.body&&!(options.body instanceof FormData))headers['Content-Type']='application/json';
+  const response=await fetch(path,{...options,headers});
+  const data=await response.json().catch(()=>({error:'Respuesta inválida del servidor'}));
+  if(!response.ok)throw new Error(data.error||'No se pudo completar la operación');
   return data;
 }
 
@@ -302,9 +310,7 @@ function contactActions(contact,kind,title){
     const body=kind==='projects'
       ?'Hola, vi tu proyecto "'+title+'" en Proyecta Chile y quisiera conversar sobre una posible cotización.'
       :'Hola, vi tu publicación "'+title+'" en Proyecta Chile y quisiera solicitar más información.';
-    return `<div class="contact-actions">
-      <a class="contact-button email" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject+title)}&body=${encodeURIComponent(body)}">Enviar correo electrónico</a>
-    </div>`;
+    return `<div class="contact-actions"><a class="contact-button email" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject+title)}&body=${encodeURIComponent(body)}">Enviar correo electrónico</a></div>`;
   }
 
   let phone=value.replace(/[^\d]/g,'');
@@ -314,90 +320,78 @@ function contactActions(contact,kind,title){
   if(phone.length===11&&phone.startsWith('56')){
     const message=kind==='projects'
       ?'Hola, vi tu proyecto "'+title+'" en Proyecta Chile. Me interesa solicitar una cotización. ¿Podemos conversar?'
-      :'Hola, encontré tu publicación "'+title+'" en Proyecta Chile. Me gustaría contactarte para solicitar más información.';
-    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
-    const label=kind==='projects'?'Solicitar cotización por WhatsApp':'Contactar por WhatsApp';
-    return `<div class="contact-actions">
-      <a class="contact-button" href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>
-    </div>`;
+      :'Hola, encontré tu publicación "'+title+'" en Proyecta Chile. Me gustaría solicitar más información.';
+    return `<div class="contact-actions"><a class="contact-button" href="https://wa.me/${phone}?text=${encodeURIComponent(message)}" target="_blank" rel="noopener noreferrer">${kind==='projects'?'Solicitar cotización por WhatsApp':'Contactar por WhatsApp'}</a></div>`;
   }
-
   return `<p class="note">Contacto publicado: ${esc(value)}. El dato no parece ser un teléfono chileno válido para abrir WhatsApp.</p>`;
 }
 
-function adminButtons(x,kind){
-  if(!adminToken||!x.id)return '';
+function adminButtons(item,kind){
+  if(!adminToken||!item.id)return '';
   return `<div class="admin-actions" onclick="event.stopPropagation()">
-    <button type="button" onclick="editRecord('${kind}',${Number(x.id)})">Editar</button>
-    <button type="button" class="danger" onclick="deleteRecord('${kind}',${Number(x.id)})">Eliminar</button>
+    <button type="button" onclick="editRecord('${kind}',${Number(item.id)})">Editar</button>
+    <button type="button" class="danger" onclick="deleteRecord('${kind}',${Number(item.id)})">Eliminar</button>
   </div>`;
 }
 
-function card(x,kind){
+function card(item,kind){
   const meta=kind==='profiles'
-    ?`${esc(x.skill||'')} · ${esc(x.area||'')}`
-    :esc(x.area||'');
-
-  const title=kind==='projects'
-    ?(x.title||x.name||'Proyecto')
-    :x.name;
-
+    ?`${esc(item.skill||'')} · ${esc(item.area||'')}`
+    :esc(item.area||'');
+  const title=kind==='projects'?(item.title||item.name||'Proyecto'):item.name;
   const extra=kind==='projects'
-    ?`<p><b>Presupuesto:</b> ${x.budget==null||x.budget===''?'No informado':money(x.budget)}</p>`
+    ?`<p><b>Presupuesto:</b> ${item.budget==null||item.budget===''?'No informado':money(item.budget)}</p>`
     :'';
-
   return `<article class="record record-clickable" role="button" tabindex="0"
-    onclick="openDetail('${kind}',${Number(x.id)})"
-    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('${kind}',${Number(x.id)})}">
-    <strong>${esc(title)}</strong>
-    <small>${meta}</small>
-    <p>${esc(x.description||'')}</p>
-    ${extra}
-    ${photosHTML(x.photos)}
-    <div class="open-hint">Ver ficha completa →</div>
-    ${adminButtons(x,kind)}
+    onclick="openDetail('${kind}',${Number(item.id)})"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('${kind}',${Number(item.id)})}">
+    <strong>${esc(title)}</strong><small>${meta}</small>
+    <p>${esc(item.description||'')}</p>${extra}${photosHTML(item.photos)}
+    <div class="open-hint">Ver ficha completa →</div>${adminButtons(item,kind)}
   </article>`;
 }
 
 function openDetail(kind,id){
   const item=cache[kind].find(x=>Number(x.id)===Number(id));
   if(!item)return;
-
   const title=kind==='projects'?(item.title||item.name||'Proyecto'):item.name;
   const kindLabel=kind==='projects'?'Proyecto':kind==='profiles'?'Profesional':'Proveedor';
-
   let details='';
 
   if(kind==='projects'){
-    details=`
-      <div class="detail-label">Tipo de trabajo</div>
-      <div class="detail-value">${esc(item.name||'No informado')}</div>
-      <div class="detail-label">Presupuesto estimado</div>
-      <div class="detail-value">${item.budget==null||item.budget===''?'No informado':money(item.budget)}</div>`;
+    details=`<div class="detail-label">Tipo de trabajo</div><div class="detail-value">${esc(item.name||'No informado')}</div>
+    <div class="detail-label">Presupuesto estimado</div><div class="detail-value">${item.budget==null||item.budget===''?'No informado':money(item.budget)}</div>`;
   }
-
   if(kind==='profiles'){
-    details=`
-      <div class="detail-label">Especialidad u oficio</div>
-      <div class="detail-value">${esc(item.skill||'No informado')}</div>`;
+    details=`<div class="detail-label">Especialidad u oficio</div><div class="detail-value">${esc(item.skill||'No informado')}</div>`;
   }
 
+  currentQuote={kind:kind==='projects'?'project':kind==='profiles'?'profile':'store',id:item.id,title:title};
   $('detailTitle').textContent=title;
   $('detailContent').innerHTML=`
     <div class="detail-label">${kindLabel}</div>
-    <div class="detail-label">Comuna o zona</div>
-    <div class="detail-value">${esc(item.area||'No informada')}</div>
+    <div class="detail-label">Comuna o zona</div><div class="detail-value">${esc(item.area||'No informada')}</div>
     ${details}
     <div class="detail-label">${kind==='stores'?'Productos o servicios':'Descripción y presentación'}</div>
     <div class="detail-value">${esc(item.description||'Sin información adicional')}</div>
-    <div class="detail-label">Contacto público</div>
-    <div class="detail-value">${esc(item.contact||'No informado')}</div>
+    <div class="detail-label">Contacto público</div><div class="detail-value">${esc(item.contact||'No informado')}</div>
     ${photosHTML(item.photos)}
     ${contactActions(item.contact,kind,title)}
+    <div class="quote-box">
+      <h3>Solicitar una cotización</h3>
+      <p class="note">Completa tus datos para enviar una solicitud al administrador de Proyecta Chile.</p>
+      <form id="quoteForm">
+        <label for="quoteName">Tu nombre *</label><input id="quoteName" name="customer_name" required maxlength="120">
+        <label for="quotePhone">Teléfono de contacto *</label><input id="quotePhone" name="phone" required maxlength="30" placeholder="+56912345678">
+        <label for="quoteArea">Comuna o localidad</label><input id="quoteArea" name="area" maxlength="100">
+        <label for="quoteDescription">¿Qué necesitas cotizar? *</label><textarea id="quoteDescription" name="description" required maxlength="2000"></textarea>
+        <button type="submit">Enviar solicitud de cotización</button>
+      </form>
+    </div>
     <p class="note">Verifica directamente los antecedentes y condiciones antes de contratar.</p>
     ${adminButtons(item,kind)}
   `;
-
+  $('quoteForm').addEventListener('submit',sendQuote);
   $('detailOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -405,23 +399,20 @@ function openDetail(kind,id){
 function closeDetail(){
   $('detailOverlay').classList.remove('open');
   document.body.style.overflow='';
+  currentQuote=null;
 }
 
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeDetail();
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
 
 function render(){
   $('nProjects').textContent=cache.projects.length;
   $('nProfiles').textContent=cache.profiles.length;
   $('nStores').textContent=cache.stores.length;
-
   const sets=[
     ['projectsList','projects','Todavía no hay proyectos publicados.','searchProjects'],
     ['profilesList','profiles','Todavía no hay profesionales publicados.','searchProfiles'],
     ['storesList','stores','Todavía no hay proveedores publicados.','searchStores']
   ];
-
   for(const [id,key,empty,searchId] of sets){
     const el=$(id);
     const q=($(searchId)?.value||'').trim().toLocaleLowerCase('es');
@@ -429,37 +420,33 @@ function render(){
       const text=[x.name,x.title,x.skill,x.area,x.description,x.contact].join(' ').toLocaleLowerCase('es');
       return text.includes(q);
     });
-    el.innerHTML=list.length?list.map(x=>card(x,key)).join():'';
+    el.innerHTML=list.map(x=>card(x,key)).join('');
     if(!list.length){
       el.className='empty';
       el.textContent=q?'No hay resultados para esa búsqueda.':empty;
-    }else{
-      el.className='';
-    }
+    }else el.className='';
   }
 }
 
-/* CORREGIDO: el servidor entrega un arreglo llamado records. */
 async function refresh(){
   try{
-    const d=await api('/api/records');
-    const records=Array.isArray(d.records)?d.records:[];
-
+    const data=await api('/api/records');
+    const records=Array.isArray(data.records)?data.records:[];
     cache={
       projects:records.filter(x=>x.type==='project'||x.type==='projects'),
       profiles:records.filter(x=>x.type==='profile'||x.type==='profiles'),
       stores:records.filter(x=>x.type==='store'||x.type==='stores')
     };
-
     render();
     status('Conectado. Los registros se comparten entre todos los teléfonos.');
-  }catch(e){
-    status('No se pudo consultar la base compartida. '+e.message,true);
+  }catch(error){
+    status('No se pudo consultar la base compartida. '+error.message,true);
   }
 }
 
 async function uploadPhotos(inputId){
-  const files=$(inputId).files;
+  const input=$(inputId);
+  const files=input.files;
   const urls=[];
   for(const file of files){
     if(file.size>5*1024*1024)throw new Error('Una fotografía supera el máximo de 5 MB.');
@@ -472,45 +459,40 @@ async function uploadPhotos(inputId){
   return urls;
 }
 
-/* CORREGIDO: el servidor espera los campos directamente junto con type. */
 async function submitRecord(type,record,form,fileInput){
+  const button=form.querySelector('button[type="submit"]');
   try{
+    button.disabled=true;
     status('Guardando publicación…');
-    const photos=await uploadPhotos(fileInput);
-    record.photos=photos;
-
+    record.photos=await uploadPhotos(fileInput);
     await api('/api/records',{
       method:'POST',
       body:JSON.stringify({...record,type})
     });
-
     form.reset();
     await refresh();
     status('¡Publicado correctamente! Ya está disponible para los visitantes.');
-  }catch(e){
-    status('No se pudo guardar: '+e.message,true);
+  }catch(error){
+    status('No se pudo guardar: '+error.message,true);
+  }finally{
+    button.disabled=false;
   }
 }
 
 $('fProject').addEventListener('submit',e=>{
   e.preventDefault();
   submitRecord('project',{
-    name:$('pType').value,
-    title:$('pTitle').value.trim(),
-    area:$('pCommune').value.trim(),
-    description:$('pDesc').value.trim(),
-    budget:$('pBudget').value,
-    contact:$('pContact').value.trim()
+    name:$('pType').value,title:$('pTitle').value.trim(),
+    area:$('pCommune').value.trim(),description:$('pDesc').value.trim(),
+    budget:$('pBudget').value,contact:$('pContact').value.trim()
   },e.currentTarget,'pPhotos');
 });
 
 $('fProfile').addEventListener('submit',e=>{
   e.preventDefault();
   submitRecord('profile',{
-    name:$('proName').value.trim(),
-    skill:$('proSkill').value.trim(),
-    area:$('proArea').value.trim(),
-    description:$('proBio').value.trim(),
+    name:$('proName').value.trim(),skill:$('proSkill').value.trim(),
+    area:$('proArea').value.trim(),description:$('proBio').value.trim(),
     contact:$('proContact').value.trim()
   },e.currentTarget,'proPhotos');
 });
@@ -518,12 +500,82 @@ $('fProfile').addEventListener('submit',e=>{
 $('fStore').addEventListener('submit',e=>{
   e.preventDefault();
   submitRecord('store',{
-    name:$('sName').value.trim(),
-    area:$('sArea').value.trim(),
-    description:$('sProducts').value.trim(),
-    contact:$('sContact').value.trim()
+    name:$('sName').value.trim(),area:$('sArea').value.trim(),
+    description:$('sProducts').value.trim(),contact:$('sContact').value.trim()
   },e.currentTarget,'sPhotos');
 });
+
+async function sendQuote(event){
+  event.preventDefault();
+  if(!currentQuote)return;
+  const form=event.currentTarget;
+  const button=form.querySelector('button[type="submit"]');
+  const fd=new FormData(form);
+  const payload={
+    record_type:currentQuote.kind,
+    record_id:currentQuote.id,
+    record_name:currentQuote.title,
+    customer_name:String(fd.get('customer_name')||'').trim(),
+    phone:String(fd.get('phone')||'').trim(),
+    area:String(fd.get('area')||'').trim(),
+    description:String(fd.get('description')||'').trim()
+  };
+  try{
+    button.disabled=true;
+    await api('/api/quotes',{method:'POST',body:JSON.stringify(payload)});
+    closeDetail();
+    status('¡Tu solicitud de cotización fue enviada correctamente!');
+  }catch(error){
+    status('No se pudo enviar la solicitud: '+error.message,true);
+    button.disabled=false;
+  }
+}
+
+async function loadQuotes(){
+  if(!adminToken)return;
+  const list=$('quotesList');
+  list.innerHTML='<div class="empty">Cargando solicitudes…</div>';
+  try{
+    const data=await api('/api/quotes');
+    const quotes=Array.isArray(data.quotes)?data.quotes:[];
+    if(!quotes.length){
+      list.innerHTML='<div class="empty">Todavía no hay solicitudes de cotización.</div>';
+      return;
+    }
+    list.innerHTML=quotes.map(q=>`
+      <article class="quote-card">
+        <h3>${esc(q.record_name||'Solicitud de cotización')}</h3>
+        <p><b>Cliente:</b> ${esc(q.customer_name)}</p>
+        <p><b>Teléfono:</b> ${esc(q.phone)}</p>
+        <p><b>Comuna:</b> ${esc(q.area||'No indicada')}</p>
+        <p><b>Detalle:</b> ${esc(q.description)}</p>
+        <p><b>Fecha:</b> ${esc(q.created_at||'')}</p>
+        <label>Estado de la solicitud</label>
+        <select onchange="changeQuoteStatus(${Number(q.id)},this.value)">
+          <option value="pendiente" ${q.status==='pendiente'?'selected':''}>Pendiente</option>
+          <option value="contactado" ${q.status==='contactado'?'selected':''}>Contactado</option>
+          <option value="cerrado" ${q.status==='cerrado'?'selected':''}>Cerrado</option>
+        </select>
+      </article>
+    `).join('');
+  }catch(error){
+    list.innerHTML='<div class="empty">No se pudieron cargar las solicitudes: '+esc(error.message)+'</div>';
+  }
+}
+
+async function changeQuoteStatus(id,newStatus){
+  try{
+    await api('/api/quotes/'+id,{
+      method:'PUT',
+      body:JSON.stringify({status:newStatus})
+    });
+    status('Estado de la solicitud actualizado.');
+    await loadQuotes();
+  }catch(error){
+    status('No se pudo actualizar: '+error.message,true);
+    await loadQuotes();
+  }
+}
 
 async function verifyAdmin(){
   if(!adminToken)return;
@@ -532,7 +584,8 @@ async function verifyAdmin(){
     $('adminLogin').classList.add('hidden');
     $('adminPanel').classList.remove('hidden');
     render();
-  }catch(e){
+    await loadQuotes();
+  }catch(error){
     adminToken='';
     sessionStorage.removeItem('pc_admin_token');
     $('adminLogin').classList.remove('hidden');
@@ -555,9 +608,10 @@ $('adminLogin').addEventListener('submit',async e=>{
     $('adminLogin').classList.add('hidden');
     $('adminPanel').classList.remove('hidden');
     await refresh();
+    await loadQuotes();
     status('Administración activada.');
-  }catch(e){
-    status('No se pudo iniciar sesión: '+e.message,true);
+  }catch(error){
+    status('No se pudo iniciar sesión: '+error.message,true);
   }
 });
 
@@ -566,6 +620,7 @@ function logoutAdmin(){
   sessionStorage.removeItem('pc_admin_token');
   $('adminLogin').classList.remove('hidden');
   $('adminPanel').classList.add('hidden');
+  $('quotesList').innerHTML='';
   render();
   status('Sesión de administración cerrada.');
 }
@@ -573,7 +628,6 @@ function logoutAdmin(){
 async function editRecord(kind,id){
   const item=cache[kind].find(x=>Number(x.id)===Number(id));
   if(!item)return;
-
   const name=prompt('Nombre o tipo de publicación:',item.name||'');
   if(name===null)return;
   const area=prompt('Comuna o zona:',item.area||'');
@@ -582,14 +636,7 @@ async function editRecord(kind,id){
   if(description===null)return;
   const contact=prompt('Contacto público:',item.contact||'');
   if(contact===null)return;
-
-  const record={
-    name:name.trim(),
-    area:area.trim(),
-    description:description.trim(),
-    contact:contact.trim()
-  };
-
+  const record={name:name.trim(),area:area.trim(),description:description.trim(),contact:contact.trim()};
   if(kind==='projects'){
     const title=prompt('Título del proyecto:',item.title||'');
     if(title===null)return;
@@ -598,22 +645,19 @@ async function editRecord(kind,id){
     record.title=title.trim();
     record.budget=budget;
   }
-
   if(kind==='profiles'){
     const skill=prompt('Especialidad u oficio:',item.skill||'');
     if(skill===null)return;
     record.skill=skill.trim();
   }
-
   record.photos=Array.isArray(item.photos)?item.photos:[];
-
   try{
     await api(`/api/records/${kind}/${id}`,{method:'PUT',body:JSON.stringify(record)});
     closeDetail();
     await refresh();
     status('Publicación actualizada.');
-  }catch(e){
-    status('No se pudo editar: '+e.message,true);
+  }catch(error){
+    status('No se pudo editar: '+error.message,true);
   }
 }
 
@@ -624,14 +668,14 @@ async function deleteRecord(kind,id){
     closeDetail();
     await refresh();
     status('Publicación eliminada.');
-  }catch(e){
-    status('No se pudo eliminar: '+e.message,true);
+  }catch(error){
+    status('No se pudo eliminar: '+error.message,true);
   }
 }
 
 function calculate(){
-  const n=id=>Math.max(0,Number($(id).value)||0);
-  const total=(n('cMaterials')+n('cLabor')+n('cOther'))*(1+n('cExtra')/100);
+  const value=id=>Math.max(0,Number($(id).value)||0);
+  const total=(value('cMaterials')+value('cLabor')+value('cOther'))*(1+value('cExtra')/100);
   $('calcResult').textContent=money(total);
   return total;
 }
@@ -653,7 +697,7 @@ function saveBudget(){
     localStorage.setItem('pc_budgets',JSON.stringify(saved.slice(0,30)));
     showSavedBudgets();
     status('Presupuesto guardado en este dispositivo.');
-  }catch(e){
+  }catch(error){
     status('No se pudo guardar el presupuesto en este dispositivo.',true);
   }
 }
@@ -661,31 +705,31 @@ function saveBudget(){
 function showSavedBudgets(){
   const el=$('savedBudgets');
   let saved=[];
-  try{saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');}catch(e){}
+  try{saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');}catch(error){}
   if(!saved.length){
     el.innerHTML='<div class="empty">Todavía no hay presupuestos guardados.</div>';
     return;
   }
   el.innerHTML=saved.map((b,i)=>`
     <article class="record">
-      <strong>${esc(b.title)}</strong>
-      <small>${esc(b.date||'')}</small>
+      <strong>${esc(b.title)}</strong><small>${esc(b.date||'')}</small>
       <p>Total: <b>${money(b.total)}</b></p>
       <button type="button" onclick="loadBudget(${i})">Abrir presupuesto</button>
       <button type="button" onclick="deleteBudget(${i})">Eliminar</button>
-    </article>`).join('');
+    </article>
+  `).join('');
 }
 
 function loadBudget(index){
   const saved=JSON.parse(localStorage.getItem('pc_budgets')||'[]');
-  const b=saved[index];
-  if(!b)return;
-  $('budgetTitle').value=b.title||'';
-  $('cMaterials').value=b.materials||0;
-  $('cLabor').value=b.labor||0;
-  $('cOther').value=b.other||0;
-  $('cExtra').value=b.extra||0;
-  $('budgetNotes').value=b.notes||'';
+  const item=saved[index];
+  if(!item)return;
+  $('budgetTitle').value=item.title||'';
+  $('cMaterials').value=item.materials||0;
+  $('cLabor').value=item.labor||0;
+  $('cOther').value=item.other||0;
+  $('cExtra').value=item.extra||0;
+  $('budgetNotes').value=item.notes||'';
   calculate();
   go('presupuesto');
 }
@@ -698,10 +742,12 @@ function deleteBudget(index){
   showSavedBudgets();
 }
 
-verifyAdmin();
-refresh();
-showSavedBudgets();
-setInterval(refresh,60000);
+document.addEventListener('DOMContentLoaded',async()=>{
+  await verifyAdmin();
+  await refresh();
+  showSavedBudgets();
+  setInterval(refresh,60000);
+});
 </script>
 </body>
 </html>
