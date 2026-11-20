@@ -142,7 +142,7 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 <label for="pBudget">Presupuesto estimado (CLP)</label><input id="pBudget" type="number" min="0" max="100000000000" step="1" placeholder="Ej. 1500000">
 <label for="pContact">Contacto público (opcional)</label><input id="pContact" maxlength="120" placeholder="Teléfono o correo">
 <label for="pPhotos">Fotografías (opcional)</label><input id="pPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-<p class="filehint">Máximo 5 MB por fotografía.</p>
+<p class="filehint">Máximo 10 fotografías por publicación y 5 MB por fotografía.</p>
 <label class="check"><input id="pConsent" type="checkbox" required> Autorizo que esta publicación y el contacto indicado sean visibles públicamente.</label>
 <button type="submit">Publicar proyecto</button><p class="note">No incluyas claves, documentos de identidad ni datos bancarios.</p>
 </form>
@@ -160,7 +160,7 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 <label for="proBio">Experiencia y presentación</label><textarea id="proBio" maxlength="2000"></textarea>
 <label for="proContact">Contacto público *</label><input id="proContact" required maxlength="120" placeholder="Teléfono o correo">
 <label for="proPhotos">Fotografías (opcional)</label><input id="proPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-<p class="filehint">Máximo 5 MB por fotografía.</p>
+<p class="filehint">Máximo 10 fotografías por publicación y 5 MB por fotografía.</p>
 <label class="check"><input id="proConsent" type="checkbox" required> Autorizo publicar estos datos en el directorio.</label>
 <button type="submit">Guardar perfil profesional</button><p class="note">La inscripción no constituye acreditación ni certificación profesional.</p>
 </form>
@@ -177,7 +177,7 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 <label for="sProducts">Productos o servicios</label><textarea id="sProducts" maxlength="2000" placeholder="Ej. materiales, áridos, herramientas"></textarea>
 <label for="sContact">Contacto comercial *</label><input id="sContact" required maxlength="120">
 <label for="sPhotos">Fotografías (opcional)</label><input id="sPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-<p class="filehint">Máximo 5 MB por fotografía.</p>
+<p class="filehint">Máximo 10 fotografías por publicación y 5 MB por fotografía.</p>
 <label class="check"><input id="sConsent" type="checkbox" required> Autorizo publicar estos datos.</label>
 <button type="submit">Registrar proveedor</button>
 </form>
@@ -446,15 +446,29 @@ async function refresh(){
 
 async function uploadPhotos(inputId){
   const input=$(inputId);
-  const files=input.files;
+  const files=Array.from(input.files||[]);
   const urls=[];
+
+  // Validar la cantidad antes de subir cualquier archivo.
+  if(files.length>10){
+    throw new Error('Puedes seleccionar un máximo de 10 fotografías por publicación.');
+  }
+
+  // Validar el tamaño de todas las fotografías antes de comenzar.
+  const oversized=files.find(file=>file.size>5*1024*1024);
+  if(oversized){
+    throw new Error('La fotografía "'+oversized.name+'" supera el máximo permitido de 5 MB.');
+  }
+
   for(const file of files){
-    if(file.size>5*1024*1024)throw new Error('Una fotografía supera el máximo de 5 MB.');
     const form=new FormData();
     form.append('file',file);
     const result=await api('/api/upload',{method:'POST',body:form});
-    if(result.url)urls.push(result.url);
-    else throw new Error('El servidor no devolvió la dirección de la fotografía.');
+    if(result.url){
+      urls.push(result.url);
+    }else{
+      throw new Error('El servidor no devolvió la dirección de una fotografía.');
+    }
   }
   return urls;
 }
@@ -577,10 +591,15 @@ async function changeQuoteStatus(id,newStatus){
   }
 }
 
+// CORRECCIÓN: el Worker responde HTTP 200 incluso cuando la sesión no es válida.
+// Por eso también debemos comprobar expresamente el valor result.ok.
 async function verifyAdmin(){
   if(!adminToken)return;
   try{
-    await api('/api/admin/check');
+    const result=await api('/api/admin/check');
+    if(!result.ok){
+      throw new Error('Sesión inválida o vencida.');
+    }
     $('adminLogin').classList.add('hidden');
     $('adminPanel').classList.remove('hidden');
     render();
