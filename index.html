@@ -76,6 +76,9 @@ form button,.primary{background:var(--green);color:white;width:100%;margin-top:1
 .detail-content .photos img{width:calc(50% - 5px);height:150px;object-fit:cover}
 .detail-label{font-size:12px;color:var(--muted);font-weight:750;margin-top:15px}
 .detail-value{font-size:15px;margin-top:3px}
+.contact-actions{display:grid;gap:9px;margin:18px 0}
+.contact-button{display:block;text-align:center;text-decoration:none;border-radius:11px;padding:13px 15px;font:700 14px system-ui;background:#16834b;color:white}
+.contact-button.email{background:var(--green)}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{gap:6px}.stat{padding:9px}.stat b{font-size:20px}.tag{font-size:9px}}
 @media print{header,nav,#globalStatus,footer,.no-print,.admin-actions,.detail-overlay{display:none!important}body{background:white}main{margin:0;max-width:none}.panel{display:none!important}#presupuesto{display:block!important}.formbox{border:0}}
 </style>
@@ -285,7 +288,42 @@ function photosHTML(photos){
   if(!Array.isArray(photos))return '';
   const valid=photos.map(safePhoto).filter(Boolean);
   if(!valid.length)return '';
-  return '<div class="photos">'+valid.map(url=>`<img src="${esc(url)}" loading="lazy" alt="Fotografía de publicación">`).join('')+'</div>';
+  return '<div class="photos">'+valid.map(url=>`<a href="${esc(url)}" target="_blank" rel="noopener"><img src="${esc(url)}" loading="lazy" alt="Fotografía de publicación"></a>`).join('')+'</div>';
+}
+
+/* Construye botones de contacto a partir del teléfono o correo publicado. */
+function contactActions(contact,kind,title){
+  const value=String(contact||'').trim();
+  if(!value)return '<p class="note">Esta publicación no tiene un contacto público informado.</p>';
+
+  const emailMatch=value.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  if(emailMatch){
+    const email=emailMatch[0];
+    const subject=kind==='projects'?'Consulta por proyecto: ':'Contacto desde Proyecta Chile: ';
+    const body=kind==='projects'
+      ?'Hola, vi tu proyecto "'+title+'" en Proyecta Chile y quisiera conversar sobre una posible cotización.'
+      :'Hola, vi tu publicación "'+title+'" en Proyecta Chile y quisiera solicitar más información.';
+    return `<div class="contact-actions">
+      <a class="contact-button email" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject+title)}&body=${encodeURIComponent(body)}">Enviar correo electrónico</a>
+    </div>`;
+  }
+
+  let phone=value.replace(/[^\d]/g,'');
+  if(phone.startsWith('00'))phone=phone.slice(2);
+  if(phone.startsWith('0'))phone=phone.slice(1);
+  if(phone.length===9)phone='56'+phone;
+  if(phone.length===11&&phone.startsWith('56')){
+    const message=kind==='projects'
+      ?'Hola, vi tu proyecto "'+title+'" en Proyecta Chile. Me interesa solicitar una cotización. ¿Podemos conversar?'
+      :'Hola, encontré tu publicación "'+title+'" en Proyecta Chile. Me gustaría contactarte para solicitar más información.';
+    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+    const label=kind==='projects'?'Solicitar cotización por WhatsApp':'Contactar por WhatsApp';
+    return `<div class="contact-actions">
+      <a class="contact-button" href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>
+    </div>`;
+  }
+
+  return `<p class="note">Contacto publicado: ${esc(value)}. El dato no parece ser un teléfono chileno válido para abrir WhatsApp.</p>`;
 }
 
 function adminButtons(x,kind){
@@ -356,6 +394,7 @@ function openDetail(kind,id){
     <div class="detail-label">Contacto público</div>
     <div class="detail-value">${esc(item.contact||'No informado')}</div>
     ${photosHTML(item.photos)}
+    ${contactActions(item.contact,kind,title)}
     <p class="note">Verifica directamente los antecedentes y condiciones antes de contratar.</p>
     ${adminButtons(item,kind)}
   `;
@@ -391,7 +430,7 @@ function render(){
       const text=[x.name,x.title,x.skill,x.area,x.description,x.contact].join(' ').toLocaleLowerCase('es');
       return text.includes(q);
     });
-    el.innerHTML=list.length?list.map(x=>card(x,key)).join(''):'';
+    el.innerHTML=list.length?list.map(x=>card(x,key)).join():'';
     if(!list.length){
       el.className='empty';
       el.textContent=q?'No hay resultados para esa búsqueda.':empty;
